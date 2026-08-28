@@ -1,0 +1,1321 @@
+{
+  "methodology": {
+    "labeled_set": "benchmarks/labeled_set.json",
+    "n_samples": 3,
+    "n_fields": 21,
+    "fuzzy_threshold": 0.85,
+    "max_new_tokens": 384,
+    "process_isolation": true
+  },
+  "host": {
+    "platform": "macOS-15.1-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python": "3.13.3",
+    "torch": "2.13.0",
+    "total_ram_gb": 16.0,
+    "cuda_available": false,
+    "mps_available": true
+  },
+  "results": [
+    {
+      "label": "CUDA / INT4 (bnb nf4)",
+      "backend": "cuda",
+      "model_id": "HuggingFaceTB/SmolVLM-Instruct",
+      "constrained": false,
+      "quantization": null,
+      "skipped": true,
+      "reason": "no CUDA device on this machine",
+      "n_samples": 0,
+      "n_schema_valid": 0,
+      "n_fields": 0,
+      "n_exact": 0,
+      "n_fuzzy": 0,
+      "n_repaired": 0,
+      "mean_seconds": null,
+      "outcomes": [],
+      "schema_validity_rate": null,
+      "exact_accuracy": null,
+      "fuzzy_accuracy": null
+    },
+    {
+      "label": "CUDA / INT8 (bnb)",
+      "backend": "cuda",
+      "model_id": "HuggingFaceTB/SmolVLM-Instruct",
+      "constrained": false,
+      "quantization": null,
+      "skipped": true,
+      "reason": "no CUDA device on this machine",
+      "n_samples": 0,
+      "n_schema_valid": 0,
+      "n_fields": 0,
+      "n_exact": 0,
+      "n_fuzzy": 0,
+      "n_repaired": 0,
+      "mean_seconds": null,
+      "outcomes": [],
+      "schema_validity_rate": null,
+      "exact_accuracy": null,
+      "fuzzy_accuracy": null
+    },
+    {
+      "label": "Apple MPS / fp16",
+      "backend": "mps",
+      "model_id": "HuggingFaceTB/SmolVLM-Instruct",
+      "constrained": false,
+      "quantization": "fp16-mps",
+      "skipped": false,
+      "reason": null,
+      "n_samples": 3,
+      "n_schema_valid": 1,
+      "n_fields": 21,
+      "n_exact": 1,
+      "n_fuzzy": 6,
+      "n_repaired": 2,
+      "mean_seconds": 38.51347861100415,
+      "outcomes": [
+        {
+          "sample_id": "medical_report",
+          "field": "patient_name",
+          "expected": "Jordan A. Rivera (SYNTHETIC)",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "mrn",
+          "expected": "SYN-00417293",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "dob",
+          "expected": "1978-03-14",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "date_of_surgery",
+          "expected": "2026-06-02",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "surgeon",
+          "expected": "Dr. L. Whitfield, MD",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "procedure",
+          "expected": "Laparoscopic cholecystectomy",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "diagnosis_code",
+          "expected": "K80.20 \u2014 Cholelithiasis without obstruction",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "asa_class",
+          "expected": "II",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "estimated_blood_loss",
+          "expected": "25 mL",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "operative_time",
+          "expected": "58 minutes",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "manifest_no",
+          "expected": "SM-2026-0642",
+          "got": "SM-206-0642",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.957
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "ship_date",
+          "expected": "2026-07-10",
+          "got": "2026-07-01",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.9
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "origin_dc",
+          "expected": "DC-WEST-04, Fort Worth TX",
+          "got": "DC-WES-T04, Fort Worth",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.894
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "destination_dc",
+          "expected": "DC-EAST-11, Columbus OH",
+          "got": "DC-EAST-11, Clumbus OH",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.978
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "carrier",
+          "expected": "ColdLink Logistics",
+          "got": "ColdLink Logistics",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "temp_requirement",
+          "expected": "2-8 C (refrigerated)",
+          "got": "-2\u00b0C (refrigerated)",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.872
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "title",
+          "expected": "Synthetic Quarterly Revenue ($M) \u2014 Sample Dashboard",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q1_revenue",
+          "expected": "4.2",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q2_revenue",
+          "expected": "5.1",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q3_revenue",
+          "expected": "4.8",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q4_revenue",
+          "expected": "6.3",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        }
+      ],
+      "schema_validity_rate": 0.3333333333333333,
+      "exact_accuracy": 0.047619047619047616,
+      "fuzzy_accuracy": 0.2857142857142857
+    },
+    {
+      "label": "CPU / fp32",
+      "backend": "cpu",
+      "model_id": "HuggingFaceTB/SmolVLM-Instruct",
+      "constrained": false,
+      "quantization": "fp32-cpu",
+      "skipped": false,
+      "reason": null,
+      "n_samples": 3,
+      "n_schema_valid": 2,
+      "n_fields": 21,
+      "n_exact": 16,
+      "n_fuzzy": 16,
+      "n_repaired": 2,
+      "mean_seconds": 144.0475684999983,
+      "outcomes": [
+        {
+          "sample_id": "medical_report",
+          "field": "patient_name",
+          "expected": "Jordan A. Rivera (SYNTHETIC)",
+          "got": "Jordan A. Rivera (SYNTHETIC)",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "mrn",
+          "expected": "SYN-00417293",
+          "got": "SYN-00417293",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "dob",
+          "expected": "1978-03-14",
+          "got": "1978-03-14",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "date_of_surgery",
+          "expected": "2026-06-02",
+          "got": "2026-06-02",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "surgeon",
+          "expected": "Dr. L. Whitfield, MD",
+          "got": "Dr. L. Whitfield, MD",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "procedure",
+          "expected": "Laparoscopic cholecystectomy",
+          "got": "Laparoscopic cholecystectomy",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "diagnosis_code",
+          "expected": "K80.20 \u2014 Cholelithiasis without obstruction",
+          "got": "K80.20 \u2014 Cholelithiasis without obstruction",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "asa_class",
+          "expected": "II",
+          "got": "II",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "estimated_blood_loss",
+          "expected": "25 mL",
+          "got": "25 mL",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "operative_time",
+          "expected": "58 minutes",
+          "got": "58 minutes",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "manifest_no",
+          "expected": "SM-2026-0642",
+          "got": "SM-2026-0642",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "ship_date",
+          "expected": "2026-07-10",
+          "got": "2026-07-10",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "origin_dc",
+          "expected": "DC-WEST-04, Fort Worth TX",
+          "got": "DC-WEST-04, Fort Worth TX",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "destination_dc",
+          "expected": "DC-EAST-11, Columbus OH",
+          "got": "DC-EAST-11, Columbus OH",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "carrier",
+          "expected": "ColdLink Logistics",
+          "got": "ColdLink Logistics",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "temp_requirement",
+          "expected": "2-8 C (refrigerated)",
+          "got": "2-8 C (refrigerated)",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "title",
+          "expected": "Synthetic Quarterly Revenue ($M) \u2014 Sample Dashboard",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q1_revenue",
+          "expected": "4.2",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q2_revenue",
+          "expected": "5.1",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q3_revenue",
+          "expected": "4.8",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q4_revenue",
+          "expected": "6.3",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        }
+      ],
+      "schema_validity_rate": 0.6666666666666666,
+      "exact_accuracy": 0.7619047619047619,
+      "fuzzy_accuracy": 0.7619047619047619
+    },
+    {
+      "label": "Apple MPS / fp16 (SmolVLM-256M)",
+      "backend": "mps",
+      "model_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "constrained": false,
+      "quantization": "fp16-mps",
+      "skipped": false,
+      "reason": null,
+      "n_samples": 3,
+      "n_schema_valid": 2,
+      "n_fields": 21,
+      "n_exact": 9,
+      "n_fuzzy": 10,
+      "n_repaired": 1,
+      "mean_seconds": 4.166629652997169,
+      "outcomes": [
+        {
+          "sample_id": "medical_report",
+          "field": "patient_name",
+          "expected": "Jordan A. Rivera (SYNTHETIC)",
+          "got": "Jordan A. Rivera (SYNTHETIC)",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "mrn",
+          "expected": "SYN-00417293",
+          "got": "SYN-00417293",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "dob",
+          "expected": "1978-03-14",
+          "got": "1978-03-14",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "date_of_surgery",
+          "expected": "2026-06-02",
+          "got": "2026-06-02",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "surgeon",
+          "expected": "Dr. L. Whitfield, MD",
+          "got": "Dr. L. Whitfield, MD",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "procedure",
+          "expected": "Laparoscopic cholecystectomy",
+          "got": "Laparoscopic cholecystectomy",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "diagnosis_code",
+          "expected": "K80.20 \u2014 Cholelithiasis without obstruction",
+          "got": "ICD-10",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.041
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "asa_class",
+          "expected": "II",
+          "got": "II",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "estimated_blood_loss",
+          "expected": "25 mL",
+          "got": "25 ml",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "operative_time",
+          "expected": "58 minutes",
+          "got": "58 minutes",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "manifest_no",
+          "expected": "SM-2026-0642",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.111
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "ship_date",
+          "expected": "2026-07-10",
+          "got": "string (YYYY-MM-DD)",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.138
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "origin_dc",
+          "expected": "DC-WEST-04, Fort Worth TX",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.194
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "destination_dc",
+          "expected": "DC-EAST-11, Columbus OH",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.138
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "carrier",
+          "expected": "ColdLink Logistics",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.25
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "temp_requirement",
+          "expected": "2-8 C (refrigerated)",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.231
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "title",
+          "expected": "Synthetic Quarterly Revenue ($M) \u2014 Sample Dashboard",
+          "got": "Synthetic Quarterly Revenue (M) - Sample Dashboard",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.99
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q1_revenue",
+          "expected": "4.2",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q2_revenue",
+          "expected": "5.1",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q3_revenue",
+          "expected": "4.8",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q4_revenue",
+          "expected": "6.3",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        }
+      ],
+      "schema_validity_rate": 0.6666666666666666,
+      "exact_accuracy": 0.42857142857142855,
+      "fuzzy_accuracy": 0.47619047619047616
+    },
+    {
+      "label": "Apple MPS / fp16 + constrained",
+      "backend": "mps",
+      "model_id": "HuggingFaceTB/SmolVLM-Instruct",
+      "constrained": true,
+      "quantization": "fp16-mps",
+      "skipped": false,
+      "reason": null,
+      "n_samples": 3,
+      "n_schema_valid": 2,
+      "n_fields": 21,
+      "n_exact": 6,
+      "n_fuzzy": 19,
+      "n_repaired": 0,
+      "mean_seconds": 28.83702990266708,
+      "outcomes": [
+        {
+          "sample_id": "medical_report",
+          "field": "patient_name",
+          "expected": "Jordan A. Rivera (SYNTHETIC)",
+          "got": "Jordan A. Rivera",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.727
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "mrn",
+          "expected": "SYN-00417293",
+          "got": "SYI-00417293",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.917
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "dob",
+          "expected": "1978-03-14",
+          "got": "197-03-14",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.947
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "date_of_surgery",
+          "expected": "2026-06-02",
+          "got": "2020-06-02",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.9
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "surgeon",
+          "expected": "Dr. L. Whitfield, MD",
+          "got": "Dr. L. Whitfield, MD",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "procedure",
+          "expected": "Laparoscopic cholecystectomy",
+          "got": "laparoscopic cholecystectomy",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "diagnosis_code",
+          "expected": "K80.20 \u2014 Cholelithiasis without obstruction",
+          "got": "K80.20 - Chololithiasis without obstruction",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.977
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "asa_class",
+          "expected": "II",
+          "got": "II",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "estimated_blood_loss",
+          "expected": "25 mL",
+          "got": "25 mL",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "operative_time",
+          "expected": "58 minutes",
+          "got": "58 minutes",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "manifest_no",
+          "expected": "SM-2026-0642",
+          "got": "SM-206-0642",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.957
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "ship_date",
+          "expected": "2026-07-10",
+          "got": "2026-07-01",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.9
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "origin_dc",
+          "expected": "DC-WEST-04, Fort Worth TX",
+          "got": "DC-WES-T04, Fort Worth",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.894
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "destination_dc",
+          "expected": "DC-EAST-11, Columbus OH",
+          "got": "DC-EAST-11, Clumbus OH",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.978
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "carrier",
+          "expected": "ColdLink Logistics",
+          "got": "ColdLink Logistics",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "temp_requirement",
+          "expected": "2-8 C (refrigerated)",
+          "got": "-2\u00b0C (refrigerated)",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.872
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "title",
+          "expected": "Synthetic Quarterly Revenue ($M) \u2014 Sample Dashboard",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q1_revenue",
+          "expected": "4.2",
+          "got": "4.2M",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.857
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q2_revenue",
+          "expected": "5.1",
+          "got": "5.1M",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.857
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q3_revenue",
+          "expected": "4.8",
+          "got": "4.8M",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.857
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q4_revenue",
+          "expected": "6.3",
+          "got": "6.3M",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.857
+        }
+      ],
+      "schema_validity_rate": 0.6666666666666666,
+      "exact_accuracy": 0.2857142857142857,
+      "fuzzy_accuracy": 0.9047619047619048
+    },
+    {
+      "label": "CPU / fp32 + constrained",
+      "backend": "cpu",
+      "model_id": "HuggingFaceTB/SmolVLM-Instruct",
+      "constrained": true,
+      "quantization": "fp32-cpu",
+      "skipped": false,
+      "reason": null,
+      "n_samples": 3,
+      "n_schema_valid": 2,
+      "n_fields": 21,
+      "n_exact": 15,
+      "n_fuzzy": 19,
+      "n_repaired": 0,
+      "mean_seconds": 48.027216819667956,
+      "outcomes": [
+        {
+          "sample_id": "medical_report",
+          "field": "patient_name",
+          "expected": "Jordan A. Rivera (SYNTHETIC)",
+          "got": "Jordan A. Rivera",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.727
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "mrn",
+          "expected": "SYN-00417293",
+          "got": "SYN-00417293",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "dob",
+          "expected": "1978-03-14",
+          "got": "1978-03-14",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "date_of_surgery",
+          "expected": "2026-06-02",
+          "got": "2026-06-02",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "surgeon",
+          "expected": "Dr. L. Whitfield, MD",
+          "got": "Dr. L. Whitfield, MD",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "procedure",
+          "expected": "Laparoscopic cholecystectomy",
+          "got": "laparoscopic cholecystectomy",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "diagnosis_code",
+          "expected": "K80.20 \u2014 Cholelithiasis without obstruction",
+          "got": "K80.20 - Cholelithiasis without obstruction",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "asa_class",
+          "expected": "II",
+          "got": "II",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "estimated_blood_loss",
+          "expected": "25 mL",
+          "got": "25 mL",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "operative_time",
+          "expected": "58 minutes",
+          "got": "58 minutes",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "manifest_no",
+          "expected": "SM-2026-0642",
+          "got": "SM-2026-0642",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "ship_date",
+          "expected": "2026-07-10",
+          "got": "2026-07-10",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "origin_dc",
+          "expected": "DC-WEST-04, Fort Worth TX",
+          "got": "DC-WEST-04, Fort Worth TX",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "destination_dc",
+          "expected": "DC-EAST-11, Columbus OH",
+          "got": "DC-EAST-11, Columbus OH",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "carrier",
+          "expected": "ColdLink Logistics",
+          "got": "ColdLink Logistics",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "temp_requirement",
+          "expected": "2-8 C (refrigerated)",
+          "got": "2-8 C (refrigerated)",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "title",
+          "expected": "Synthetic Quarterly Revenue ($M) \u2014 Sample Dashboard",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q1_revenue",
+          "expected": "4.2",
+          "got": "4.2M",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.857
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q2_revenue",
+          "expected": "5.1",
+          "got": "5.1M",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.857
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q3_revenue",
+          "expected": "4.8",
+          "got": "4.8M",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.857
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q4_revenue",
+          "expected": "6.3",
+          "got": "6.3M",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.857
+        }
+      ],
+      "schema_validity_rate": 0.6666666666666666,
+      "exact_accuracy": 0.7142857142857143,
+      "fuzzy_accuracy": 0.9047619047619048
+    },
+    {
+      "label": "Apple MPS / fp16 (SmolVLM-256M) + constrained",
+      "backend": "mps",
+      "model_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "constrained": true,
+      "quantization": "fp16-mps",
+      "skipped": false,
+      "reason": null,
+      "n_samples": 3,
+      "n_schema_valid": 3,
+      "n_fields": 21,
+      "n_exact": 9,
+      "n_fuzzy": 10,
+      "n_repaired": 0,
+      "mean_seconds": 5.479745388996283,
+      "outcomes": [
+        {
+          "sample_id": "medical_report",
+          "field": "patient_name",
+          "expected": "Jordan A. Rivera (SYNTHETIC)",
+          "got": "Jordan A. Rivera (SYNTHETIC)",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "mrn",
+          "expected": "SYN-00417293",
+          "got": "SYN-00417293",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "dob",
+          "expected": "1978-03-14",
+          "got": "1978-03-14",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "date_of_surgery",
+          "expected": "2026-06-02",
+          "got": "2026-06-02",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "surgeon",
+          "expected": "Dr. L. Whitfield, MD",
+          "got": "Dr. L. Whitfield, MD",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "procedure",
+          "expected": "Laparoscopic cholecystectomy",
+          "got": "Laparoscopic cholecystectomy",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "diagnosis_code",
+          "expected": "K80.20 \u2014 Cholelithiasis without obstruction",
+          "got": "ICD-10",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.041
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "asa_class",
+          "expected": "II",
+          "got": "II",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "estimated_blood_loss",
+          "expected": "25 mL",
+          "got": "25 ml",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "medical_report",
+          "field": "operative_time",
+          "expected": "58 minutes",
+          "got": "58 minutes",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "manifest_no",
+          "expected": "SM-2026-0642",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.111
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "ship_date",
+          "expected": "2026-07-10",
+          "got": "string (YYYY-MM-DD)",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.138
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "origin_dc",
+          "expected": "DC-WEST-04, Fort Worth TX",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.194
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "destination_dc",
+          "expected": "DC-EAST-11, Columbus OH",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.138
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "carrier",
+          "expected": "ColdLink Logistics",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.25
+        },
+        {
+          "sample_id": "shipping_manifest",
+          "field": "temp_requirement",
+          "expected": "2-8 C (refrigerated)",
+          "got": "string",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.231
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "title",
+          "expected": "Synthetic Quarterly Revenue ($M) \u2014 Sample Dashboard",
+          "got": "Synthetic Quarterly Revenue (M) - Sample Dashboard",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.99
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q1_revenue",
+          "expected": "4.2",
+          "got": "$5.1M",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.25
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q2_revenue",
+          "expected": "5.1",
+          "got": "$4.2M",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.25
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q3_revenue",
+          "expected": "4.8",
+          "got": "$5.1M",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.25
+        },
+        {
+          "sample_id": "chart_dashboard",
+          "field": "q4_revenue",
+          "expected": "6.3",
+          "got": "$4.8M",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.25
+        }
+      ],
+      "schema_validity_rate": 1.0,
+      "exact_accuracy": 0.42857142857142855,
+      "fuzzy_accuracy": 0.47619047619047616
+    }
+  ]
+}

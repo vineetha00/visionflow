@@ -12,6 +12,14 @@ VisionFlow loads a small VLM ([SmolVLM](https://huggingface.co/HuggingFaceTB/Smo
 pip install visionflow
 ```
 
+Or from source:
+
+```bash
+git clone https://github.com/vineetha00/visionflow && cd visionflow && pip install -e .
+```
+
+Optional extras: `[cuda]` for bitsandbytes INT4/INT8, `[cpu]` for the llama.cpp GGUF path, `[onnx]` / `[onnx-gpu]` for ONNX Runtime, `[constrained]` for full-vocabulary constrained decoding via `outlines`, `[eval]` for the GPT-4o baseline.
+
 ## Quickstart
 
 All three output modes, in under 10 lines:
@@ -113,7 +121,7 @@ Model size is part of hardware detection, not a constant. A 2.25B VLM is unusabl
 |---|---|---|---|
 | NVIDIA GPU, ≥6GB VRAM | SmolVLM-2.25B | `bitsandbytes` INT4 (NF4), INT8 fallback | ⚠️ Implemented, **never run** — no NVIDIA hardware available during development |
 | NVIDIA GPU, 3–6GB VRAM | SmolVLM-500M | `bitsandbytes` INT4 | ⚠️ Same |
-| Apple Silicon, ≥16GB | SmolVLM-2.25B | fp16 on `mps` | ✅ Measured below |
+| Apple Silicon, ≥16GB | SmolVLM-2.25B | fp16 on `mps` | ✅ Measured below — **fast, but see the fp16 accuracy finding** |
 | Apple Silicon, 8–16GB | SmolVLM-500M | fp16 on `mps` | ✅ Path measured at the 256M tier below |
 | CPU / Raspberry Pi, <4GB | SmolVLM-256M | fp32, or GGUF INT4 via `llama-cpp-python` | ✅ fp32 measured below; GGUF implemented, not benchmarked |
 | CPU, ≥4GB | SmolVLM-500M | fp32 or GGUF | ✅ Measured below at both 2.25B and 256M |
@@ -171,7 +179,28 @@ Two accuracy columns, because either alone misleads: a 2B VLM reading a scanned 
 vf accuracy
 ```
 
-<!-- ACCURACY_TABLE -->
+| Configuration | Quant | Schema-valid | Field acc. (exact) | Field acc. (fuzzy) | Repairs used | Mean s/sample |
+|---|---|---|---|---|---|---|
+| CUDA / INT4 (bnb nf4) | — | *not measured — no CUDA device on this machine* | — | — | — | — |
+| CUDA / INT8 (bnb) | — | *not measured — no CUDA device on this machine* | — | — | — | — |
+| Apple MPS / fp16 | fp16-mps | 33% (1/3) | 5% (1/21) | 29% (6/21) | 2 | 38.5 |
+| CPU / fp32 | fp32-cpu | 67% (2/3) | **76%** (16/21) | 76% (16/21) | 2 | 144.0 |
+| Apple MPS / fp16 (SmolVLM-256M) | fp16-mps | 67% (2/3) | 43% (9/21) | 48% (10/21) | 1 | 4.2 |
+| Apple MPS / fp16 + constrained | fp16-mps | 67% (2/3) | 29% (6/21) | **90%** (19/21) | **0** | 28.8 |
+| CPU / fp32 + constrained | fp32-cpu | 67% (2/3) | 71% (15/21) | **90%** (19/21) | **0** | **48.0** |
+| MPS / fp16 (SmolVLM-256M) + constrained | fp16-mps | **100%** (3/3) | 43% (9/21) | 48% (10/21) | **0** | 5.5 |
+
+Raw per-field outcomes: [`benchmarks/results/accuracy_report.json`](benchmarks/results/accuracy_report.json).
+
+**The headline result is uncomfortable, so it goes first: the fast path is the inaccurate one.** On identical weights and prompts, fp32 on CPU scores 76% exact field accuracy against fp16 on MPS's 5% — while being 3.7× slower. That is not a rounding difference, it's a different quality tier. The likely cause is fp16 range loss in the vision tower degrading the image features, which is a known hazard for fp16 inference on some architectures; this benchmark measures it but does not prove the mechanism. Anyone deploying the MPS path should treat this as the finding that matters most, and it is exactly the kind of result a speed-only benchmark would never surface.
+
+**Constrained decoding eliminated the repair pass entirely** — 0 repairs in all three constrained rows, against 1–2 in every unconstrained one — and raised fuzzy field accuracy to 90% on both 2.25B configurations.
+
+**Constrained decoding was also faster, substantially.** CPU/fp32 went from 144.0s to 48.0s per sample, a 3× speedup; MPS from 38.5s to 28.8s. Two effects compound: no second forward pass for repair, and the grammar forces generation to stop when the object closes instead of rambling toward the token limit. "Correctness enforcement costs latency" is the intuition here, and on this workload it is simply wrong.
+
+**The 256M model at 100% schema validity in 5.5s** is the deployable configuration for a Pi-class device — provided 43% exact field accuracy is acceptable for the use case, which for triage or routing it may well be and for clinical extraction it is not.
+
+Caveats that limit how far these numbers travel: **21 fields, one seed, three images.** The exact/fuzzy gap on the constrained MPS row (29% vs 90%) means most of its answers are near-misses rather than hits, and fuzzy matching at 0.85 similarity is generous on short strings — `2026-06-02` vs `202-06-02` passes fuzzy and fails exact, which is the intended behavior but should be read as "almost right", not "right". These numbers are sound for ranking configurations against each other and are not a basis for an absolute accuracy claim.
 
 ## Constrained decoding
 
@@ -246,7 +275,7 @@ Only the vision encoder is exported by default: it's a single fixed-shape forwar
 1. **A benchmarking methodology, not a benchmark run** — process isolation, excluded warmup, p50/p95, tokens/sec, and explicit skip rows. The methodology section above documents *why* each choice was made, including the memory-measurement bug it was written to fix.
 2. **Correctness moved from prompting into the inference stack** — grammar-constrained decoding makes invalid JSON unrepresentable, with the repair loop demoted to a fallback for schema semantics.
 3. **Capability tiers per device** — model size is part of hardware auto-detection, so the same code path serves an M3 and a Pi without the user choosing a checkpoint.
-4. **Accuracy reported against quantization level, not in isolation** — schema validity and field accuracy per configuration, so the speed/accuracy trade-off is visible instead of asserted.
+4. **Accuracy reported against quantization level, not in isolation** — schema validity and field accuracy per configuration, so the speed/accuracy trade-off is visible instead of asserted. This is what surfaced the fp16 accuracy cliff above, which a latency-only benchmark would have reported as a straight 3.7× win.
 5. **Honest about what wasn't run** — the CUDA, TensorRT, and GGUF paths are implemented and unmeasured, and they say so in every table rather than being quietly omitted.
 
 ## Repo structure
@@ -277,11 +306,14 @@ visionflow/
 
 Listed here rather than discovered later:
 
-- **No NVIDIA measurements.** The INT4/INT8 bitsandbytes paths and both GPU execution providers are implemented and untested on real hardware.
+- **The fp16-on-MPS accuracy drop is measured but not explained.** 5% vs 76% exact accuracy against fp32 on identical weights is a large enough gap that it deserves a root-cause investigation (per-layer activation range analysis on the vision tower) before the MPS path is trusted for extraction. It is not fixed here.
+- **No NVIDIA measurements.** The INT4/INT8 bitsandbytes paths and both GPU execution providers are implemented and untested on real hardware. Note that the fp16 finding above makes the untested INT4/INT8 accuracy question more pressing, not less.
 - **The labeled set is 3 images.** Enough to compare configurations, not enough to state an absolute accuracy figure.
 - **No GPT-4o Vision baseline was run.** `eval.py` implements the comparison; it requires `OPENAI_API_KEY` and reports `ran: false` with a reason when the key is absent, rather than fabricating a score.
-- **GGUF/llama.cpp path unbenchmarked.** Implemented in `quantize.py`; no numbers.
+- **GGUF/llama.cpp path unbenchmarked.** Implemented in `quantize.py` including GBNF grammar wiring; no numbers.
 - **Constrained decoding's top-k window** is an approximation on the built-in path — see above.
+- **The exported ONNX graph covers the vision encoder only, for full patch grids only.** The decoder isn't exported, and the position-id specialization that makes export possible is invalid for padded patches.
+- **The 500M (MEDIUM) tier is selected but never benchmarked here.** This machine has 16GB and picks the 2.25B tier; the 256M tier was benchmarked by pinning it explicitly. The 500M path is the same code, but no numbers were measured for it.
 
 ## License
 
