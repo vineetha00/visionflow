@@ -264,16 +264,31 @@ class JSONPrefixLogitsProcessor(_LogitsProcessorBase):
     See the module docstring for the top-k approximation and its consequences.
     """
 
-    def __init__(self, processor, prompt_len: int, top_k: int = 256):
+    def __init__(self, processor, prompt_len: int, top_k: int = 256,
+                 require_object: bool = True):
         self.tokenizer = getattr(processor, "tokenizer", processor)
         self.prompt_len = prompt_len
         self.top_k = top_k
+        # Constrain from the very first token. An earlier version waited for a '{'
+        # to appear before constraining anything, which sounded permissive and was
+        # actually useless: when the model opened with prose instead of JSON, the
+        # constraint never engaged at all and the run was indistinguishable from
+        # unconstrained decoding. Forcing the first non-whitespace token to open an
+        # object is what makes "valid JSON by construction" true.
+        self.require_object = require_object
         self._decode_cache: dict[int, str] = {}
         self.eos_token_id = getattr(self.tokenizer, "eos_token_id", None)
         # Diagnostics — surfaced in benchmarks so the cost of constraining is visible.
         self.steps = 0
         self.tokens_masked = 0
         self.fallback_steps = 0
+
+    def _allows(self, text: str) -> bool:
+        """Is `text` a viable partial JSON document under this processor's rules?"""
+        stripped = text.lstrip()
+        if self.require_object and stripped and stripped[0] != "{":
+            return False
+        return is_valid_json_prefix(stripped)
 
     def _token_text(self, token_id: int) -> str:
         text = self._decode_cache.get(token_id)
@@ -287,21 +302,14 @@ class JSONPrefixLogitsProcessor(_LogitsProcessorBase):
 
         self.steps += 1
         generated_ids = input_ids[0, self.prompt_len :]
-        prefix = self.tokenizer.decode(generated_ids, skip_special_tokens=True)
-
-        # Leading whitespace/prose before the first '{' is tolerated by the
-        # extractor's brace-scan, so only start constraining once a '{' appears.
-        brace = prefix.find("{")
-        if brace == -1:
-            return scores
-        json_prefix = prefix[brace:]
+        json_prefix = self.tokenizer.decode(generated_ids, skip_special_tokens=True)
 
         k = min(self.top_k, scores.shape[-1])
         top_scores, top_indices = torch.topk(scores[0], k)
 
         mask = torch.full_like(scores, float("-inf"))
         allowed_any = False
-        complete = is_complete_json(json_prefix)
+        complete = is_complete_json(json_prefix.strip())
 
         for score, idx in zip(top_scores.tolist(), top_indices.tolist()):
             if self.eos_token_id is not None and idx == self.eos_token_id:
@@ -313,7 +321,7 @@ class JSONPrefixLogitsProcessor(_LogitsProcessorBase):
             piece = self._token_text(idx)
             if piece == "":
                 continue
-            if is_valid_json_prefix(json_prefix + piece):
+            if self._allows(json_prefix + piece):
                 mask[0, idx] = score
                 allowed_any = True
             else:

@@ -55,11 +55,26 @@ def test_unavailable_provider_renders_as_not_measured():
 def test_export_success_reports_numeric_agreement_with_torch():
     export = ExportResult(
         ok=True, path="x.onnx", opset=17, seconds=3.2,
-        input_shape=[1, 3, 512, 512], output_shape=[1, 1024, 768],
-        max_abs_diff_vs_torch=1.2e-5,
+        input_shape=[1, 3, 384, 384], output_shape=[1, 729, 1152],
+        max_abs_diff_vs_torch=1.2e-5, exporter="torchscript",
     )
     table = to_markdown(export, [])
     assert "ok" in table and "1.20e-05" in table
+    # Which exporter produced the graph matters: the two disagree on this model,
+    # so a reader has to be able to tell which one the numbers came from.
+    assert "torchscript" in table
+
+
+def test_graph_that_exports_but_cannot_run_is_not_reported_as_success():
+    """The dynamo exporter emits a loadable graph for SmolVLM's vision tower that
+    throws at runtime. Reporting that as a successful export would be a lie."""
+    export = ExportResult(
+        ok=False, opset=17,
+        error="dynamo: exported but failed verification: InvalidArgument: GatherND invalid index",
+    )
+    table = to_markdown(export, [])
+    assert "failed" in table
+    assert "GatherND" in table
 
 
 def test_export_failure_is_reported_not_swallowed():

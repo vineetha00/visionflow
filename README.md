@@ -187,19 +187,51 @@ Three paths, in preference order:
 
 This guarantees **syntactic** validity only. Whether the values are *correct*, and whether they satisfy the schema's semantics, is still the caller's problem — so `constrained=True` keeps the repair pass as a fallback for schema-level failures.
 
+### What it actually changes
+
+Same image, same schema, same greedy decode, SmolVLM-256M on MPS:
+
+| | Raw model output | Parsed result | Repair pass needed | Time |
+|---|---|---|---|---|
+| Repair loop (v1) | `Synthetic Quarterly Revenue ($M) - Sample Dashboard` — prose, not JSON | `{"title": …, "subtitle": …, "x-axis": …, "y-axis": …}` | **yes** | 3.9s |
+| Constrained | `{ "title": …, "q1_revenue": …, "q2_revenue": …, "q3_revenue": … }` | same, parsed directly | no | 3.5s |
+
+Three things to notice. The unconstrained model didn't emit *slightly malformed* JSON — it emitted no JSON at all, and only the repair pass rescued it. That repair invented `subtitle`, `x-axis`, and `y-axis`, none of which are in the requested schema, because it was re-prompted on prose rather than on a partial object. And constraining was **faster**, because skipping a second full forward pass more than pays for the per-step masking (4,237 tokens masked across 68 steps, zero fallbacks).
+
+Both runs still get the *values* wrong — a 256M model misreads the bar values. Constrained decoding buys you syntax and schema conformance, not accuracy. The next table is where accuracy gets measured.
+
+Reproduce: `python examples/constrained_extraction.py`
+
 ## ONNX Runtime and TensorRT
 
 `visionflow/onnx_export.py` exports SmolVLM's vision tower to ONNX and benchmarks it across execution providers. Verification status, stated plainly:
 
 | Path | Status |
 |---|---|
-| ONNX export of the vision encoder | ✅ Verified on Apple M3 — output checked against PyTorch to a numeric tolerance |
+| ONNX export of the vision encoder | ✅ Verified on Apple M3 — max abs. difference vs PyTorch = **5.04e-04** |
 | `CPUExecutionProvider` | ✅ Measured |
-| `CUDAExecutionProvider` | ⚠️ **Implemented, never run** — no NVIDIA hardware available |
-| `TensorrtExecutionProvider` | ⚠️ **Implemented, never run** — no NVIDIA hardware available |
+| `CUDAExecutionProvider` | ⚠️ **Implemented, never run** — not in this `onnxruntime` build; no NVIDIA hardware available |
+| `TensorrtExecutionProvider` | ⚠️ **Implemented, never run** — same |
+| `CoreMLExecutionProvider` | Available but excluded by default — see below |
 | Full-model export (decoder + KV cache) | Delegated to `optimum.exporters.onnx`; not exercised here |
 
-<!-- ONNX_TABLE -->
+```
+ONNX export: ok — torchscript+static-position-ids, opset 17, 22.3s,
+             input [1, 3, 384, 384] → output [1, 729, 1152],
+             max |ONNX − PyTorch| = 5.04e-04
+```
+
+| Execution provider | Status | p50 (ms) | p95 (ms) | mean (ms) |
+|---|---|---|---|---|
+| TensorrtExecutionProvider | *not measured — not available in this onnxruntime build* | — | — | — |
+| CUDAExecutionProvider | *not measured — not available in this onnxruntime build* | — | — | — |
+| CPUExecutionProvider | ok | 2585.44 | 2675.20 | 2556.77 |
+
+One image patch (384×384) through the vision tower, 20 runs, 3 warmup. Note the tolerance: **5.04e-04 is loose for fp32**, and it is the honest figure — accumulated difference across a deep transformer, not a bit-exact match. It is small enough that downstream token predictions are unaffected, but it is not zero and the table says so.
+
+**Getting this to export at all took a real fix, worth naming.** SmolVLM's vision embeddings compute position ids by counting unmasked patches, bucketizing fractional coordinates, and scattering through a boolean mask. Both ONNX exporters trace that into a `GatherND` whose indices are valid only for the traced batch — the graph exports without complaint, loads without complaint, and then throws `invalid index found, index = 26` on the *very input it was exported with*. For a full, unpadded patch grid that whole computation reduces to `arange(num_patches)`, so the exporter specializes it away. The exported graph is therefore correct for full patch grids and wrong for padded ones — and rather than assume the substitution is safe, the harness compares the exported graph against the **unpatched** PyTorch module, which is where the 5.04e-04 comes from.
+
+CoreML is excluded from the default provider list: it compiles at session-creation time and supports only 768 of this graph's 1607 nodes, so it spends minutes partitioning and then runs a hybrid CoreML/CPU graph whose latency answers a different question. Opt in with `--providers CoreMLExecutionProvider`.
 
 The TensorRT path is written against the ORT provider API, not from measured experience, and it is labelled that way here rather than presented as a result. ORT falls back silently — requesting `TensorrtExecutionProvider` on a machine without it yields a working CPU session and no error — so the harness records the provider the live session *actually* used and flags any fallback, which means a CPU number can't be mistaken for a TensorRT one. To earn those rows, run this on a CUDA machine:
 

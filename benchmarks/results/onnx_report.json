@@ -5,21 +5,31 @@
     "CPUExecutionProvider"
   ],
   "export": {
-    "ok": false,
-    "path": null,
+    "ok": true,
+    "path": "benchmarks/onnx/vision_encoder.onnx",
     "opset": 17,
-    "seconds": null,
-    "input_shape": null,
-    "output_shape": null,
-    "max_abs_diff_vs_torch": null,
-    "error": "ModuleNotFoundError: No module named 'onnxscript'"
+    "seconds": 22.332103458000347,
+    "input_shape": [
+      1,
+      3,
+      384,
+      384
+    ],
+    "output_shape": [
+      1,
+      729,
+      1152
+    ],
+    "max_abs_diff_vs_torch": 0.0005035400390625,
+    "exporter": "torchscript+static-position-ids",
+    "error": null
   },
   "benchmarks": [
     {
       "provider_requested": "TensorrtExecutionProvider",
       "provider_used": null,
       "ok": false,
-      "reason": "benchmarks/onnx/vision_encoder.onnx not found \u2014 run --export first",
+      "reason": "TensorrtExecutionProvider not available in this onnxruntime build",
       "n_runs": 0,
       "latencies_ms": [],
       "mean_ms": null,
@@ -30,18 +40,7 @@
       "provider_requested": "CUDAExecutionProvider",
       "provider_used": null,
       "ok": false,
-      "reason": "benchmarks/onnx/vision_encoder.onnx not found \u2014 run --export first",
-      "n_runs": 0,
-      "latencies_ms": [],
-      "mean_ms": null,
-      "p50_ms": null,
-      "p95_ms": null
-    },
-    {
-      "provider_requested": "CoreMLExecutionProvider",
-      "provider_used": null,
-      "ok": false,
-      "reason": "benchmarks/onnx/vision_encoder.onnx not found \u2014 run --export first",
+      "reason": "CUDAExecutionProvider not available in this onnxruntime build",
       "n_runs": 0,
       "latencies_ms": [],
       "mean_ms": null,
@@ -50,14 +49,35 @@
     },
     {
       "provider_requested": "CPUExecutionProvider",
-      "provider_used": null,
-      "ok": false,
-      "reason": "benchmarks/onnx/vision_encoder.onnx not found \u2014 run --export first",
-      "n_runs": 0,
-      "latencies_ms": [],
-      "mean_ms": null,
-      "p50_ms": null,
-      "p95_ms": null
+      "provider_used": "CPUExecutionProvider",
+      "ok": true,
+      "reason": null,
+      "n_runs": 20,
+      "latencies_ms": [
+        2645.2676670014625,
+        2597.414709001896,
+        2639.209375003702,
+        2696.462749998318,
+        2632.9950830113376,
+        2674.0786250011297,
+        2666.8991659971653,
+        2668.997375003528,
+        2650.5851660040207,
+        2456.14624999871,
+        2340.355208987603,
+        2545.4816249985015,
+        2542.94125000888,
+        2456.8713750049938,
+        2458.6398750107037,
+        2490.558499994222,
+        2604.7079590061912,
+        2414.1316669993103,
+        2380.238500001724,
+        2573.4716660081176
+      ],
+      "mean_ms": 2556.772689602076,
+      "p50_ms": 2585.443187505007,
+      "p95_ms": 2675.197831250989
     }
   ]
 }

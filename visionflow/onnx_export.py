@@ -60,6 +60,7 @@ class ExportResult:
     input_shape: Optional[list] = None
     output_shape: Optional[list] = None
     max_abs_diff_vs_torch: Optional[float] = None
+    exporter: Optional[str] = None
     error: Optional[str] = None
 
 
@@ -142,6 +143,41 @@ class _VisionWrapper:
         return Wrapper(vision_module)
 
 
+def _specialize_position_ids(vision_module) -> bool:
+    """Replace SmolVLM's data-dependent position-id computation with `arange`.
+
+    `Idefics3VisionEmbeddings.forward` derives position ids by counting unmasked
+    patches, bucketizing fractional coordinates, and scattering through a boolean
+    mask. That is only meaningful when patches are *padded*; for a full, unpadded
+    patch grid it reduces exactly to `arange(num_patches)`. Both ONNX exporters
+    trace the general form into a GatherND whose indices are valid only for the
+    traced batch, producing a graph that loads fine and then throws
+    "invalid index found" on the very input it was exported with.
+
+    Specializing to the unpadded case removes the data dependence. The exported
+    graph is then correct for full patch grids — which is what the processor
+    produces — and wrong for padded ones, so it is NOT a general replacement for
+    the PyTorch module. Correctness of the substitution is not assumed: the caller
+    compares the exported graph against the *unpatched* module's output.
+
+    Returns True if the patch was applied.
+    """
+    import torch
+
+    embeddings = getattr(vision_module, "embeddings", None)
+    if embeddings is None or not hasattr(embeddings, "patch_embedding"):
+        return False
+
+    def static_forward(pixel_values, patch_attention_mask=None, **_kwargs):
+        patch_embeds = embeddings.patch_embedding(pixel_values)
+        embedded = patch_embeds.flatten(2).transpose(1, 2)
+        position_ids = torch.arange(embedded.shape[1], device=embedded.device).unsqueeze(0)
+        return embedded + embeddings.position_embedding(position_ids)
+
+    embeddings.forward = static_forward
+    return True
+
+
 def _patch_size(processor, default: int = 384) -> tuple[int, int]:
     """Side length of one image patch, as the vision tower expects it.
 
@@ -185,36 +221,69 @@ def export_vision_encoder(
     dummy = torch.randn(1, 3, *_patch_size(processor))
 
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
-    start = time.perf_counter()
-    try:
-        with torch.no_grad():
-            torch_out = wrapper(dummy)
-            torch.onnx.export(
-                wrapper, (dummy,), out_path,
-                input_names=["pixel_values"], output_names=["last_hidden_state"],
-                dynamic_axes={"pixel_values": {0: "batch"}, "last_hidden_state": {0: "batch"}},
-                opset_version=opset, do_constant_folding=True,
-            )
-    except Exception as e:
-        return ExportResult(ok=False, opset=opset, error=f"{type(e).__name__}: {e}")
-    elapsed = time.perf_counter() - start
 
-    result = ExportResult(
-        ok=True, path=out_path, opset=opset, seconds=elapsed,
-        input_shape=list(dummy.shape), output_shape=list(torch_out.shape),
-    )
+    # Reference output comes from the UNPATCHED module, so the specialization
+    # below is checked rather than trusted.
+    with torch.no_grad():
+        torch_out = wrapper(dummy)
 
-    if verify:
+    specialized = _specialize_position_ids(vision_module)
+
+    # Two exporters, tried in order, because they fail differently on this model.
+    # SmolVLM's vision embeddings derive position ids through data-dependent
+    # indexing (bucketize + boolean-mask scatter over the patch attention mask).
+    # The dynamo exporter traces that into a GatherND whose indices are only valid
+    # for the traced batch, so the graph exports cleanly and then throws
+    # "invalid index found" at runtime. The legacy tracer specializes the same
+    # control flow to concrete values, which is correct for a fixed patch shape.
+    # Whichever succeeds is recorded, so the report says how the graph was made.
+    attempts, errors = [("torchscript", False), ("dynamo", True)], []
+    result = None
+
+    for name, use_dynamo in attempts:
+        start = time.perf_counter()
+        try:
+            with torch.no_grad():
+                kwargs = {"dynamo": use_dynamo} if use_dynamo else {}
+                torch.onnx.export(
+                    wrapper, (dummy,), out_path,
+                    input_names=["pixel_values"], output_names=["last_hidden_state"],
+                    dynamic_axes={"pixel_values": {0: "patches"},
+                                  "last_hidden_state": {0: "patches"}},
+                    opset_version=opset, do_constant_folding=True, **kwargs,
+                )
+        except Exception as e:
+            errors.append(f"{name}: {type(e).__name__}: {e}")
+            continue
+
+        candidate = ExportResult(
+            ok=True, path=out_path, opset=opset, seconds=time.perf_counter() - start,
+            input_shape=list(dummy.shape), output_shape=list(torch_out.shape),
+            exporter=name + ("+static-position-ids" if specialized else ""),
+        )
+        if not verify:
+            return candidate
+
         try:
             import numpy as np
             import onnxruntime as ort
 
             session = ort.InferenceSession(out_path, providers=["CPUExecutionProvider"])
             onnx_out = session.run(None, {"pixel_values": dummy.numpy()})[0]
-            result.max_abs_diff_vs_torch = float(np.max(np.abs(onnx_out - torch_out.numpy())))
+            candidate.max_abs_diff_vs_torch = float(np.max(np.abs(onnx_out - torch_out.numpy())))
+            return candidate
         except Exception as e:
-            result.error = f"export succeeded but verification failed: {type(e).__name__}: {e}"
+            # An exported graph that can't run is not a successful export, no
+            # matter what the exporter returned. Keep trying.
+            errors.append(f"{name}: exported but failed verification: {type(e).__name__}: {e}")
+            candidate.ok = False
+            candidate.error = errors[-1]
+            result = candidate
 
+    if result is None:
+        result = ExportResult(ok=False, opset=opset)
+    result.ok = False
+    result.error = " | ".join(errors)
     return result
 
 
@@ -304,10 +373,10 @@ def to_markdown(export: Optional[ExportResult], benches: list[OnnxBenchResult]) 
         if export.ok:
             diff = export.max_abs_diff_vs_torch
             lines.append(
-                f"ONNX export: **ok** — opset {export.opset}, {export.seconds:.1f}s, "
+                f"ONNX export: **ok** — {export.exporter or 'default'} exporter, "
+                f"opset {export.opset}, {export.seconds:.1f}s, "
                 f"input {export.input_shape} → output {export.output_shape}"
                 + (f", max |ONNX − PyTorch| = {diff:.2e}" if diff is not None else "")
-                + (f" ({export.error})" if export.error else "")
             )
         else:
             lines.append(f"ONNX export: **failed** — {export.error}")

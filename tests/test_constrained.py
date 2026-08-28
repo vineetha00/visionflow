@@ -117,6 +117,56 @@ def test_gbnf_escapes_quotes_in_keys():
     assert r"\\\"" in grammar or 'we\\\\"ird' in grammar or "we" in grammar
 
 
+class _FakeTokenizer:
+    eos_token_id = 99
+
+    def decode(self, ids, skip_special_tokens=True):
+        return "".join(_VOCAB[int(i)] for i in ids)
+
+
+_VOCAB = {0: "{", 1: '"a"', 2: ":", 3: "1", 4: "}", 5: "Here", 6: " is", 99: ""}
+
+
+def _processor_stub():
+    class P:
+        tokenizer = _FakeTokenizer()
+
+    return P()
+
+
+def test_constraint_engages_from_the_first_token():
+    """Regression: an earlier version only began constraining after a '{' appeared
+    in the output. When the model opened with prose instead, the constraint never
+    engaged and constrained decoding was silently identical to unconstrained."""
+    from visionflow.constrained import JSONPrefixLogitsProcessor
+
+    proc = JSONPrefixLogitsProcessor(_processor_stub(), prompt_len=0)
+    # Nothing generated yet: prose must be rejected, an opening brace allowed.
+    assert not proc._allows("Here")
+    assert proc._allows("{")
+    assert proc._allows("  {")
+
+
+def test_require_object_rejects_bare_scalars():
+    from visionflow.constrained import JSONPrefixLogitsProcessor
+
+    proc = JSONPrefixLogitsProcessor(_processor_stub(), prompt_len=0)
+    assert not proc._allows("[1]")
+    assert not proc._allows("null")
+
+    loose = JSONPrefixLogitsProcessor(_processor_stub(), prompt_len=0, require_object=False)
+    assert loose._allows("[1]")
+
+
+def test_allows_accepts_growing_valid_object():
+    from visionflow.constrained import JSONPrefixLogitsProcessor
+
+    proc = JSONPrefixLogitsProcessor(_processor_stub(), prompt_len=0)
+    for partial in ['{', '{"a"', '{"a":', '{"a": 1', '{"a": 1}']:
+        assert proc._allows(partial), partial
+    assert not proc._allows('{"a": 1} trailing')
+
+
 def test_schema_conversion_infers_types():
     converted = _to_json_schema({
         "name": "string",
