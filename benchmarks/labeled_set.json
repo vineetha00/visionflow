@@ -1,0 +1,77 @@
+{
+  "_about": "Labeled evaluation set for VisionFlow. Ground truth is the literal text rendered into each synthetic sample image by examples/generate_sample_images.py, so labels are exact by construction rather than human-annotated. Every value is fabricated: no real patient, shipment, or company data appears here. This set is small (3 images, 20 fields) and is intended to make quantization-level differences visible, not to establish absolute accuracy — for that, see the DocVQA/ChartQA note in the README.",
+  "samples": [
+    {
+      "id": "medical_report",
+      "image": "examples/sample_images/medical_report.png",
+      "category": "medical document",
+      "prompt": "Extract the patient data, procedure details, and diagnosis code from this surgical report.",
+      "schema": {
+        "patient_name": "string",
+        "mrn": "string",
+        "dob": "string (YYYY-MM-DD)",
+        "date_of_surgery": "string (YYYY-MM-DD)",
+        "surgeon": "string",
+        "procedure": "string",
+        "diagnosis_code": "string",
+        "asa_class": "string",
+        "estimated_blood_loss": "string",
+        "operative_time": "string"
+      },
+      "ground_truth": {
+        "patient_name": "Jordan A. Rivera (SYNTHETIC)",
+        "mrn": "SYN-00417293",
+        "dob": "1978-03-14",
+        "date_of_surgery": "2026-06-02",
+        "surgeon": "Dr. L. Whitfield, MD",
+        "procedure": "Laparoscopic cholecystectomy",
+        "diagnosis_code": "K80.20 — Cholelithiasis without obstruction",
+        "asa_class": "II",
+        "estimated_blood_loss": "25 mL",
+        "operative_time": "58 minutes"
+      }
+    },
+    {
+      "id": "shipping_manifest",
+      "image": "examples/sample_images/shipping_manifest.png",
+      "category": "structured form",
+      "prompt": "Extract the manifest header fields from this cold chain shipping manifest.",
+      "schema": {
+        "manifest_no": "string",
+        "ship_date": "string (YYYY-MM-DD)",
+        "origin_dc": "string",
+        "destination_dc": "string",
+        "carrier": "string",
+        "temp_requirement": "string"
+      },
+      "ground_truth": {
+        "manifest_no": "SM-2026-0642",
+        "ship_date": "2026-07-10",
+        "origin_dc": "DC-WEST-04, Fort Worth TX",
+        "destination_dc": "DC-EAST-11, Columbus OH",
+        "carrier": "ColdLink Logistics",
+        "temp_requirement": "2-8 C (refrigerated)"
+      }
+    },
+    {
+      "id": "chart_dashboard",
+      "image": "examples/sample_images/chart_dashboard.png",
+      "category": "chart",
+      "prompt": "Extract the chart title and the revenue value for each quarter shown in this bar chart.",
+      "schema": {
+        "title": "string",
+        "q1_revenue": "string",
+        "q2_revenue": "string",
+        "q3_revenue": "string",
+        "q4_revenue": "string"
+      },
+      "ground_truth": {
+        "title": "Synthetic Quarterly Revenue ($M) — Sample Dashboard",
+        "q1_revenue": "4.2",
+        "q2_revenue": "5.1",
+        "q3_revenue": "4.8",
+        "q4_revenue": "6.3"
+      }
+    }
+  ]
+}

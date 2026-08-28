@@ -1,0 +1,63 @@
+{
+  "host_providers": [
+    "CoreMLExecutionProvider",
+    "AzureExecutionProvider",
+    "CPUExecutionProvider"
+  ],
+  "export": {
+    "ok": false,
+    "path": null,
+    "opset": 17,
+    "seconds": null,
+    "input_shape": null,
+    "output_shape": null,
+    "max_abs_diff_vs_torch": null,
+    "error": "ModuleNotFoundError: No module named 'onnxscript'"
+  },
+  "benchmarks": [
+    {
+      "provider_requested": "TensorrtExecutionProvider",
+      "provider_used": null,
+      "ok": false,
+      "reason": "benchmarks/onnx/vision_encoder.onnx not found \u2014 run --export first",
+      "n_runs": 0,
+      "latencies_ms": [],
+      "mean_ms": null,
+      "p50_ms": null,
+      "p95_ms": null
+    },
+    {
+      "provider_requested": "CUDAExecutionProvider",
+      "provider_used": null,
+      "ok": false,
+      "reason": "benchmarks/onnx/vision_encoder.onnx not found \u2014 run --export first",
+      "n_runs": 0,
+      "latencies_ms": [],
+      "mean_ms": null,
+      "p50_ms": null,
+      "p95_ms": null
+    },
+    {
+      "provider_requested": "CoreMLExecutionProvider",
+      "provider_used": null,
+      "ok": false,
+      "reason": "benchmarks/onnx/vision_encoder.onnx not found \u2014 run --export first",
+      "n_runs": 0,
+      "latencies_ms": [],
+      "mean_ms": null,
+      "p50_ms": null,
+      "p95_ms": null
+    },
+    {
+      "provider_requested": "CPUExecutionProvider",
+      "provider_used": null,
+      "ok": false,
+      "reason": "benchmarks/onnx/vision_encoder.onnx not found \u2014 run --export first",
+      "n_runs": 0,
+      "latencies_ms": [],
+      "mean_ms": null,
+      "p50_ms": null,
+      "p95_ms": null
+    }
+  ]
+}

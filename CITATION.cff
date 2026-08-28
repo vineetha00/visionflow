@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use VisionFlow in your work, please cite it as below."
+title: "VisionFlow: an edge-first, quantized Vision-Language Model pipeline for local medical and document intelligence"
+type: software
+authors:
+  - family-names: "Vallish Kumar"
+    given-names: "Vineetha"
+repository-code: "https://github.com/vineetha00/visionflow"
+url: "https://pypi.org/project/visionflow/"
+license: MIT
+version: 0.2.0
+date-released: 2026-08-27
+keywords:
+  - vision-language-model
+  - vlm
+  - quantization
+  - edge-ai
+  - medical-ai
+  - document-intelligence
+  - benchmarking
+  - constrained-decoding
+  - onnx

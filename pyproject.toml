@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visionflow"
+version = "0.2.0"
+description = "Edge-first, quantized Vision-Language Model pipeline for local medical and document intelligence"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Vineetha", email = "vineetha@usc.edu" }]
+keywords = ["vlm", "vision-language-model", "quantization", "edge-ai", "medical-ai", "document-intelligence", "smolvlm", "local-inference"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Healthcare Industry",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dependencies = [
+  "torch>=2.2",
+  "transformers>=4.42",
+  "accelerate>=0.30",
+  "pillow>=10.0",
+  "numpy>=1.24",
+  "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+cuda = ["bitsandbytes>=0.43"]
+cpu = ["llama-cpp-python>=0.2.90"]
+eval = ["openai>=1.30", "matplotlib>=3.8", "psutil>=5.9"]
+onnx = ["onnx>=1.16", "onnxruntime>=1.18"]
+onnx-gpu = ["onnx>=1.16", "onnxruntime-gpu>=1.18"]
+constrained = ["outlines>=0.1"]
+dev = ["pytest>=8.0", "pytest-cov"]
+
+[project.urls]
+Homepage = "https://github.com/vineetha00/visionflow"
+Repository = "https://github.com/vineetha00/visionflow"
+
+[project.scripts]
+visionflow = "visionflow.cli:main"
+vf = "visionflow.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["visionflow*"]
