@@ -1,8 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=visionflow-gpu
-#SBATCH --account=CHANGE_ME            # <-- your PI/project account (see `myaccount`)
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:a100:1              # a40 / v100 also fine; >=16GB VRAM keeps the 2.25B tier
+#SBATCH --gres=gpu:a40:1               # 48GB, comfortably fits the 2.25B tier at fp16/INT8
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
@@ -16,8 +15,12 @@
 # Fills the four rows this project cannot measure on Apple Silicon: bitsandbytes
 # INT4/INT8 (CUDA-only kernels) and the CUDA / TensorRT ONNX execution providers.
 #
-# Submit with:   sbatch scripts/carc_gpu_benchmark.slurm
+# Submit with:   sbatch --account=<your_account> scripts/carc_gpu_benchmark.slurm
 # Watch with:    squeue --me   /   tail -f logs/visionflow-gpu-<jobid>.out
+#
+# The account is passed at submit time rather than hardcoded here, so that
+# `git pull` never conflicts with a local edit of this file (and so the repo
+# carries nobody's allocation ID). Find yours with `myaccount`.
 #
 # Before submitting, run the one-time setup in the README section "GPU run on
 # CARC" -- in particular, pre-download the model weights on the LOGIN node.
