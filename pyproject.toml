@@ -3,7 +3,13 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "visionflow"
+# Distribution name only. The import package and CLI are still `visionflow` /
+# `vf` -- [project.name] and [project.scripts] are independent. The bare name
+# `visionflow` is a registered but empty project on PyPI owned by someone else,
+# so uploads to it are rejected with 403. Note that pypi.org/pypi/<name>/json
+# returns 404 for such names, which makes it useless as an availability check;
+# pypi.org/simple/<name>/ is the endpoint that tells the truth.
+name = "visionflow-edge"
 version = "0.2.0"
 description = "Edge-first, quantized Vision-Language Model pipeline for local medical and document intelligence"
 readme = "README.md"

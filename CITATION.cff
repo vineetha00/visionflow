@@ -6,7 +6,7 @@ authors:
   - family-names: "Vallish Kumar"
     given-names: "Vineetha"
 repository-code: "https://github.com/vineetha00/visionflow"
-url: "https://pypi.org/project/visionflow/"
+url: "https://pypi.org/project/visionflow-edge/"
 license: MIT
 version: 0.2.0
 date-released: 2026-08-27

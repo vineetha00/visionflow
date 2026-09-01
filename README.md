@@ -9,8 +9,10 @@ VisionFlow loads a small VLM ([SmolVLM](https://huggingface.co/HuggingFaceTB/Smo
 ## Install
 
 ```bash
-pip install visionflow
+pip install visionflow-edge
 ```
+
+The distribution is `visionflow-edge`; the import and CLI are plain `visionflow` / `vf`. (The bare `visionflow` name on PyPI is a registered-but-empty project owned by someone else.)
 
 Or from source:
 
