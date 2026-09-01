@@ -10,6 +10,10 @@
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
 #
+# NOTE: `mkdir -p logs` before your first sbatch. Slurm opens these files before
+# the script body runs, so the mkdir further down cannot create the directory in
+# time -- the job starts with nowhere to write its output.
+#
 # VisionFlow GPU benchmark for USC CARC (Discovery).
 #
 # Fills the four rows this project cannot measure on Apple Silicon: bitsandbytes

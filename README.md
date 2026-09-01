@@ -277,11 +277,13 @@ pip install -e ".[cuda,onnx-gpu,eval]"
 python -c "from huggingface_hub import snapshot_download as d; [d(m) for m in ['HuggingFaceTB/SmolVLM-Instruct','HuggingFaceTB/SmolVLM-256M-Instruct']]"
 ```
 
-Then set `--account` in the script (find yours with `myaccount`) and submit:
+Then submit, passing your account (find it with `myaccount`). Create `logs/` first — Slurm opens the job's output file before the script body runs, so the script cannot create its own log directory:
 
 ```bash
-sbatch scripts/carc_gpu_benchmark.slurm
+mkdir -p logs && sbatch --account=<your_account> scripts/carc_gpu_benchmark.slurm
 ```
+
+CUDA is hidden behind a compiler in CARC's Lmod hierarchy, so `module load cuda` alone fails. On Discovery the working pairing is `gcc/12.3.0 cuda/12.4.1`; find yours with `module spider cuda/<version> 2>&1 | cat`. Install torch from the **cu126** index rather than letting pip resolve it — the default wheel there is `+cu130`, and `onnxruntime-gpu` (CUDA 12 + cuDNN 9) and `bitsandbytes` will not work against CUDA 13.
 
 Results land in `benchmarks/results/*_cuda.{json,md}`, written under separate filenames so a GPU run never overwrites the Apple Silicon numbers above.
 
