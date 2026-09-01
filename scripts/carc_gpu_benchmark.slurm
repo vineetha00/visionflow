@@ -38,13 +38,27 @@ export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 mkdir -p logs benchmarks/results
 
 # --- Environment -----------------------------------------------------------
-# Module names and versions drift on CARC; check `module avail cuda` and
-# `module avail conda` and adjust. The CUDA module must be loaded before the
-# bitsandbytes and onnxruntime-gpu imports, or they fall back to CPU silently.
+# CUDA is hidden behind a compiler in CARC's Lmod hierarchy -- `module load cuda`
+# alone fails with "exist but cannot be loaded as requested". This pairing was
+# found on Discovery with:
+#   for g in $(module -t avail gcc | grep '^gcc/'); do
+#     module purge; module load "$g" cuda/12.4.1 && echo "$g"; done
+# Override without editing this file: export VISIONFLOW_MODULES="gcc/... cuda/..."
+#
+# CUDA 12.x deliberately, not 11.8: current torch and onnxruntime-gpu wheels are
+# built against CUDA 12 (ORT >=1.19 needs CUDA 12 + cuDNN 9), and pairing a cu12
+# torch with an 11.8 module leaves bitsandbytes unable to find a runtime -- which
+# surfaces as INT4/INT8 load-failure rows, i.e. exactly the measurement this job
+# exists to produce.
+#
+# No `|| true` here on purpose. An earlier version tolerated module-load failures,
+# which meant a wrong version name was swallowed and the job ran to completion on
+# CPU -- producing plausible numbers that were not GPU numbers. Under `set -e` a
+# bad module name now kills the job in the first seconds instead.
+: "${VISIONFLOW_MODULES:=gcc/12.3.0 cuda/12.4.1 conda}"
 module purge
-module load gcc/11.3.0 || true
-module load cuda/11.8.0 || module load cuda || true
-module load conda || true
+module load ${VISIONFLOW_MODULES}
+module list 2>&1
 
 source "${VISIONFLOW_VENV:-$HOME/visionflow/.venv}/bin/activate"
 
