@@ -224,11 +224,14 @@ def available_configs(model_id: Optional[str] = None, include_constrained: bool 
 
     out = [dict(c, constrained=False) for c in configs]
     if include_constrained:
-        # Constrained decoding is the comparison that matters for the extraction
-        # story, so pair it with whichever backend actually runs on this machine.
+        # Every backend gets a constrained counterpart, CUDA included. An earlier
+        # version skipped CUDA here on the reasoning that it would be skipped
+        # anyway on the dev machine — which meant that on an actual GPU box, the
+        # comparison that matters most would silently not run. Unavailable
+        # configurations are already handled by the worker's skip path; there is
+        # no need to second-guess availability when building the list.
         for c in configs:
-            if c["backend"] != "cuda":
-                out.append(dict(c, constrained=True, label=c["label"] + " + constrained"))
+            out.append(dict(c, constrained=True, label=c["label"] + " + constrained"))
     return out
 
 

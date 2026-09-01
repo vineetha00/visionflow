@@ -262,6 +262,27 @@ One image patch (384×384) through the vision tower, 20 runs, 3 warmup. Note the
 
 CoreML is excluded from the default provider list: it compiles at session-creation time and supports only 768 of this graph's 1607 nodes, so it spends minutes partitioning and then runs a hybrid CoreML/CPU graph whose latency answers a different question. Opt in with `--providers CoreMLExecutionProvider`.
 
+### GPU run on CARC (or any Slurm cluster)
+
+[`scripts/carc_gpu_benchmark.slurm`](scripts/carc_gpu_benchmark.slurm) runs all three harnesses on one GPU node. One-time setup on the **login** node — model weights must be cached there, since compute nodes may have no outbound internet:
+
+```bash
+export HF_HOME=/scratch1/$USER/hf     # /home1 quota is too small for a 4.5GB checkpoint
+git clone https://github.com/vineetha00/visionflow ~/visionflow && cd ~/visionflow
+module purge && module load conda cuda
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[cuda,onnx-gpu,eval]"
+python -c "from huggingface_hub import snapshot_download as d; [d(m) for m in ['HuggingFaceTB/SmolVLM-Instruct','HuggingFaceTB/SmolVLM-256M-Instruct']]"
+```
+
+Then set `--account` in the script (find yours with `myaccount`) and submit:
+
+```bash
+sbatch scripts/carc_gpu_benchmark.slurm
+```
+
+Results land in `benchmarks/results/*_cuda.{json,md}`, written under separate filenames so a GPU run never overwrites the Apple Silicon numbers above.
+
 The TensorRT path is written against the ORT provider API, not from measured experience, and it is labelled that way here rather than presented as a result. ORT falls back silently — requesting `TensorrtExecutionProvider` on a machine without it yields a working CPU session and no error — so the harness records the provider the live session *actually* used and flags any fallback, which means a CPU number can't be mistaken for a TensorRT one. To earn those rows, run this on a CUDA machine:
 
 ```bash
