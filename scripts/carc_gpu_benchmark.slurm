@@ -55,13 +55,19 @@ mkdir -p logs benchmarks/results
 # which meant a wrong version name was swallowed and the job ran to completion on
 # CPU -- producing plausible numbers that were not GPU numbers. Under `set -e` a
 # bad module name now kills the job in the first seconds instead.
-# 12.6.3 specifically, to match a torch built as +cu126. PyPI's default torch
-# wheel on this stack was +cu130, which had to be replaced: onnxruntime-gpu
-# targets CUDA 12 + cuDNN 9 and would not have found CUDA 13 libraries, so the
-# TensorRT/CUDA provider rows would have come back unavailable, and CUDA 13
-# wheels additionally want an r580+ driver that HPC nodes rarely carry. Install
-# torch from https://download.pytorch.org/whl/cu126 to keep these in step.
-: "${VISIONFLOW_MODULES:=gcc/12.3.0 cuda/12.6.3 conda}"
+# Only the CUDA *major* version has to match the torch build. CUDA 12.x provides
+# minor-version compatibility, so this 12.4.1 module runs a +cu126 torch happily;
+# each cuda module sits under a different compiler in the hierarchy and 12.6.3 is
+# not reachable from gcc/12.3.0, so there is nothing to gain by chasing an exact
+# minor match.
+#
+# The major version does matter. PyPI's default torch wheel on this stack was
+# +cu130, which had to be replaced: onnxruntime-gpu targets CUDA 12 + cuDNN 9 and
+# would not have found CUDA 13 libraries, so the TensorRT/CUDA provider rows would
+# have come back unavailable -- and bitsandbytes CUDA 13 support is immature,
+# which is the other half of what this job measures. Install torch from
+# https://download.pytorch.org/whl/cu126 and keep this module on CUDA 12.
+: "${VISIONFLOW_MODULES:=gcc/12.3.0 cuda/12.4.1 conda}"
 module purge
 module load ${VISIONFLOW_MODULES}
 module list 2>&1
