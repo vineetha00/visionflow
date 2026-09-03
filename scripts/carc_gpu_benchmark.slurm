@@ -44,6 +44,32 @@ export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
 
 mkdir -p logs benchmarks/results
 
+# ONNX Runtime's CUDA and TensorRT providers need libcublas/libcudnn on the
+# loader path, and CARC's cuda module does not put them there -- the provider
+# .so fails to load, ORT falls back to CPU, and `get_available_providers()`
+# still lists the provider the whole time. torch's +cu12x wheel already bundles
+# exactly these libraries as nvidia-* pip packages, so point the loader at them.
+# Appended after venv activation below (needs the venv's python to locate them).
+_add_torch_cuda_libs() {
+  local libs
+  libs="$(python - <<'PY' 2>/dev/null || true
+import os
+try:
+    import nvidia
+except ImportError:
+    raise SystemExit
+p = os.path.dirname(nvidia.__file__)
+print(":".join(os.path.join(p, d, "lib") for d in os.listdir(p)
+                if os.path.isdir(os.path.join(p, d, "lib"))))
+PY
+)"
+  [ -n "$libs" ] && export LD_LIBRARY_PATH="${libs}:${LD_LIBRARY_PATH:-}"
+  # TensorRT ships its own libnvinfer via the tensorrt-cu12 wheel, if installed.
+  local trt
+  trt="$(python -c 'import os,tensorrt_libs; print(os.path.dirname(tensorrt_libs.__file__))' 2>/dev/null || true)"
+  [ -n "$trt" ] && export LD_LIBRARY_PATH="${trt}:${LD_LIBRARY_PATH:-}"
+}
+
 # --- Environment -----------------------------------------------------------
 # CUDA is hidden behind a compiler in CARC's Lmod hierarchy -- `module load cuda`
 # alone fails with "exist but cannot be loaded as requested". This pairing was
@@ -80,6 +106,7 @@ module load ${VISIONFLOW_MODULES}
 module list 2>&1
 
 source "${VISIONFLOW_VENV:-$HOME/visionflow/.venv}/bin/activate"
+_add_torch_cuda_libs
 
 echo "=== host ==="
 hostname
