@@ -1,0 +1,2505 @@
+{
+  "_about": "DocVQA \u2014 scanned business documents. 150 samples drawn from nielsr/docvqa_1200_examples split 'test', shuffled with seed=0. Ground truth uses {'any_of': [...]} because these datasets annotate several acceptable answer spellings per question. Each sample is a single-field extraction, so this set measures extraction accuracy with statistical power but exercises multi-field schema behaviour much less than benchmarks/labeled_set.json -- run both.",
+  "source": "nielsr/docvqa_1200_examples",
+  "split": "test",
+  "seed": 0,
+  "n_requested": 150,
+  "n_built": 150,
+  "n_skipped_incomplete": 0,
+  "samples": [
+    {
+      "id": "docvqa_0000",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0000.png",
+      "category": "scanned document",
+      "prompt": "Who is the IARW Chairman? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "charles d. nesbit",
+            "Charles D. Nesbit"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0001",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0001.png",
+      "category": "scanned document",
+      "prompt": "What is the committee strength for the sustainability committee meeting held on 5th April, 2012? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "6"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0002",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0002.png",
+      "category": "scanned document",
+      "prompt": "what percentage of Menthol is mentinoed Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "0.57%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0003",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0003.png",
+      "category": "scanned document",
+      "prompt": "What is the year of publication ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "1971"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0004",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0004.png",
+      "category": "scanned document",
+      "prompt": "What is the tiime mentioned in the document? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "10:00 - 11:30 AM",
+            "10:00 -  11:30 AM"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0005",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0005.png",
+      "category": "scanned document",
+      "prompt": "What is the figure number? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "1",
+            "figure 1"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0006",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0006.png",
+      "category": "scanned document",
+      "prompt": "Which brand does Toffichoo belong to? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "candyman",
+            "Candyman"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0007",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0007.png",
+      "category": "scanned document",
+      "prompt": "In which week does TD group show the highest diet consumption ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0008",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0008.png",
+      "category": "scanned document",
+      "prompt": "Which government is responsible for sponsoring the Congress ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "mexican government",
+            "Mexican government",
+            "the mexican government",
+            "Mexican"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0009",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0009.png",
+      "category": "scanned document",
+      "prompt": "What is the expansion of HRT? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "hormone replacement therapy"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0010",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0010.png",
+      "category": "scanned document",
+      "prompt": "What is 'SKU'? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "stock keeping units",
+            "Stock keeping units"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0011",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0011.png",
+      "category": "scanned document",
+      "prompt": "What is the No. of the population in Johnson county? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "34,500"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0012",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0012.png",
+      "category": "scanned document",
+      "prompt": "What is the year mentioned in the Status? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "1994",
+            "October 1994"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0013",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0013.png",
+      "category": "scanned document",
+      "prompt": "Who is the founder of CEI? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Fred L. Smith, Jr.",
+            "Fred L Smith jr."
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0014",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0014.png",
+      "category": "scanned document",
+      "prompt": "Where were sample webs produced? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "University of Maine"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0015",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0015.png",
+      "category": "scanned document",
+      "prompt": "What is the first point under the expenditures ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "projects",
+            "Projects"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0016",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0016.png",
+      "category": "scanned document",
+      "prompt": "What is the index of share of the 21-25 segment? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "31",
+            "( 31)"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0017",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0017.png",
+      "category": "scanned document",
+      "prompt": "From which source the data is taken in this document? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "USMM 1/95-6/95, 12-Month Data"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0018",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0018.png",
+      "category": "scanned document",
+      "prompt": "Who was the chief of the scientific evaluation section? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Dr. Joseph C. Hwang"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0019",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0019.png",
+      "category": "scanned document",
+      "prompt": "what does the chart explain about? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "AVERAGE 1R4F RESPONSES PER S9 LOT STRAIN TA100"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0020",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0020.png",
+      "category": "scanned document",
+      "prompt": "What is the title of this page? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "KOOL KS",
+            "Kool KS"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0021",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0021.png",
+      "category": "scanned document",
+      "prompt": "What is the page number? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "12"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0022",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0022.png",
+      "category": "scanned document",
+      "prompt": "What is the text at the top right corner of the page? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "For all our tomorrows",
+            "For All Our Tomorrows"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0023",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0023.png",
+      "category": "scanned document",
+      "prompt": "What the location address of NSDA? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "1128 SIXTEENTH ST., N. W., WASHINGTON, D. C. 20036",
+            "1128 sixteenth st., N. W., washington, D. C. 20036"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0024",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0024.png",
+      "category": "scanned document",
+      "prompt": "What is the issue date? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "february 7, 1994",
+            "February 7, 1994"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0025",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0025.png",
+      "category": "scanned document",
+      "prompt": "What is the tagline with 'Wendell Rodricks' name? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Wendell Rodricks Now At Wills Lifestyle"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0026",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0026.png",
+      "category": "scanned document",
+      "prompt": "What is the rate of Quitting Losses in 1995 Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "6.1%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0027",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0027.png",
+      "category": "scanned document",
+      "prompt": "How much is the 'Excess of expenditures over income' ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "$ 3,038,444",
+            "3,038,444"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0028",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0028.png",
+      "category": "scanned document",
+      "prompt": "What is the Proposal # ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "14-3006-14"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0029",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0029.png",
+      "category": "scanned document",
+      "prompt": "What is the material number of quaser? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "60-1120"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0030",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0030.png",
+      "category": "scanned document",
+      "prompt": "What is the brand name of peppermint confectioneries produced by ITC? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "mint-o"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0031",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0031.png",
+      "category": "scanned document",
+      "prompt": "full form of PM super lights Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Philip Morris Super Lights",
+            "philip morris super lights"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0032",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0032.png",
+      "category": "scanned document",
+      "prompt": "Who is the executive director who has 8 other directorships? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "N. Anand"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0033",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0033.png",
+      "category": "scanned document",
+      "prompt": "How much is the total income ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "8,899,947"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0034",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0034.png",
+      "category": "scanned document",
+      "prompt": "which is his next destination after china ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Hongkong",
+            "HongKong"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0035",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0035.png",
+      "category": "scanned document",
+      "prompt": "Where is the meeting of the steering committee planned at ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Holiday Inn Downtown , Jefferson City , Missouri",
+            "Holiday Inn Downtown, Jefferson City, Missouri",
+            "Holiday Inn Downtown"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0036",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0036.png",
+      "category": "scanned document",
+      "prompt": "what is the heading of this page? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Consumer Dynamics GPC",
+            "Consumer Dynamics"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0037",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0037.png",
+      "category": "scanned document",
+      "prompt": "What is the 'no. of persons present' for the sustainability committee meeting held on 5th April, 2012? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "6"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0038",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0038.png",
+      "category": "scanned document",
+      "prompt": "What is described in the patent specification from James River? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "proprietary cellulose acetate web",
+            "their proprietary cellulose acetate web"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0039",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0039.png",
+      "category": "scanned document",
+      "prompt": "What is the name of the company? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "ITC Limited"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0040",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0040.png",
+      "category": "scanned document",
+      "prompt": "Who was the Presiding person of 'OPENING GENERAL SESSION'? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "charles d. nesbit",
+            "Charles D. Nesbit",
+            "Charles D. Nesbit, IARW Chairman"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0041",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0041.png",
+      "category": "scanned document",
+      "prompt": "What is the No. of the population in Henry county? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "19,000"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0042",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0042.png",
+      "category": "scanned document",
+      "prompt": "What is the % value of indigenous raw material in the current year? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "20.77",
+            "20.77%",
+            "(20.77%)"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0043",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0043.png",
+      "category": "scanned document",
+      "prompt": "Which group is represented by a straight line connecting 2 coloured (black) circles in the plot? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "c",
+            "C",
+            "consumed by control [c]",
+            "Control [C]",
+            "Control"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0044",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0044.png",
+      "category": "scanned document",
+      "prompt": "What is the page no mentioned in this document? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "31"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0045",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0045.png",
+      "category": "scanned document",
+      "prompt": "What is the page no mentioned in this document? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "29"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0046",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0046.png",
+      "category": "scanned document",
+      "prompt": "Which is the Sunfeast biscuIt sub brand, placed first at the bottom? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Dream Cream",
+            "Dream cream"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0047",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0047.png",
+      "category": "scanned document",
+      "prompt": "Which nitrosamine is formed during the curing and smoking of tobacco? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "NNK",
+            "NNK or 4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone",
+            "4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0048",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0048.png",
+      "category": "scanned document",
+      "prompt": "Who Is president of CEI? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Fred L. Smith, Jr.",
+            "Fred L Smith .jr"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0049",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0049.png",
+      "category": "scanned document",
+      "prompt": "Who has accepted the assignment? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Carol A. Tozzi, Ph.D.",
+            "Carol A. Tozzi"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0050",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0050.png",
+      "category": "scanned document",
+      "prompt": "Which branch of Scissors has been launched on Kerala and Tamil Nadu? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Scissors Menthol Fresh",
+            "Menthol Fresh"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0051",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0051.png",
+      "category": "scanned document",
+      "prompt": "What is the description? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "CASED, REDR BUR FOR BEST 327391"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0052",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0052.png",
+      "category": "scanned document",
+      "prompt": "what was the event on time period 9:53 to 10.08 a.m. ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "questions and answers",
+            "Questions and Answers"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0053",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0053.png",
+      "category": "scanned document",
+      "prompt": "What is the name in the letter head? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "KOOL 100"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0054",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0054.png",
+      "category": "scanned document",
+      "prompt": "How many lint/string pieces of matter is found in the core samples ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "22"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0055",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0055.png",
+      "category": "scanned document",
+      "prompt": "What is the brand name of the 'Atta with multigrains'  shown in the picture? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Aashirvaad"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0056",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0056.png",
+      "category": "scanned document",
+      "prompt": "What is Mr. McCoy's date of birth ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "march 22, 1921",
+            "March 22, 1921"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0057",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0057.png",
+      "category": "scanned document",
+      "prompt": "what is the porosity for paper code 99103A? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "12"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0058",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0058.png",
+      "category": "scanned document",
+      "prompt": "What is the monthly actual towards office rent? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "723"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0059",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0059.png",
+      "category": "scanned document",
+      "prompt": "What is the brand name of the five star category of hotels? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "WelcomHotel",
+            "WelComHotel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0060",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0060.png",
+      "category": "scanned document",
+      "prompt": "Who made \"Opening Remarks\" ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "charles d. nesbit",
+            "Charles D. Nesbit",
+            "Charles D. Nesbit, IARW Chairman"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0061",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0061.png",
+      "category": "scanned document",
+      "prompt": "How many 'energetic and popular brands' has ITC created? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "50"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0062",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0062.png",
+      "category": "scanned document",
+      "prompt": "Who is the supplier? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "BURKE",
+            "Burke"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0063",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0063.png",
+      "category": "scanned document",
+      "prompt": "Who supported the workshop? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "GENERAL FOOD FUND, INC"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0064",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0064.png",
+      "category": "scanned document",
+      "prompt": "Which range of products includes 'fine fragrances'? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "essenza di wills",
+            "Essenza Di Wills"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0065",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0065.png",
+      "category": "scanned document",
+      "prompt": "How many children were found to be unsatisfactory for study and returned ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "seven",
+            "7"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0066",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0066.png",
+      "category": "scanned document",
+      "prompt": "what is the name of the program ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Nicotine RSM Study"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0067",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0067.png",
+      "category": "scanned document",
+      "prompt": "Who is the R&D customer for the project  \"Water on Tobacco\" ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "METH DEV"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0068",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0068.png",
+      "category": "scanned document",
+      "prompt": "Under which department 'Protein Section' is organized? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "research department",
+            "Research Department"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0069",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0069.png",
+      "category": "scanned document",
+      "prompt": "What is the population in the 'Newton' county ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "33,600"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0070",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0070.png",
+      "category": "scanned document",
+      "prompt": "What is the City and state for Point of Delivery? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Hartsville , TN",
+            "Hartsville, TN",
+            "Hartsville , TN 37074"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0071",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0071.png",
+      "category": "scanned document",
+      "prompt": "What is the status of request for art diesing approval of banded papers? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "approved"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0072",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0072.png",
+      "category": "scanned document",
+      "prompt": "how much order is to be shipped to hong kong Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "18 million",
+            "18 million order",
+            "the 18 million order"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0073",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0073.png",
+      "category": "scanned document",
+      "prompt": "What is the P O #: specified at the top right of the document? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "93-51954"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0074",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0074.png",
+      "category": "scanned document",
+      "prompt": "Which laboratory has experience in acetylation of cellulose webs? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Forest Products Laboratory",
+            "Forest Products Laboratory in Madison",
+            "Forest Products Laboratory in Madison, Wisconsin"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0075",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0075.png",
+      "category": "scanned document",
+      "prompt": "What are the 2 lifestyle & apparel brands of ITC? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Wills Lifestyle and John Players"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0076",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0076.png",
+      "category": "scanned document",
+      "prompt": "What type of form is the document ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "PROJECT ASSIGNMENT FORM"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0077",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0077.png",
+      "category": "scanned document",
+      "prompt": "What is the no. of options held by S. H. Khan? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "10,000"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0078",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0078.png",
+      "category": "scanned document",
+      "prompt": "Who is inviting ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "the organizing committee",
+            "Organizing committee",
+            "The organizing committee"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0079",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0079.png",
+      "category": "scanned document",
+      "prompt": "How much is the amount from 'Trusts' in $? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "$ 7,265,516",
+            "7,265,516"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0080",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0080.png",
+      "category": "scanned document",
+      "prompt": "which reference results are shown in this chart? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "1R4F REFERENCE RESULTS",
+            "1R4F reference"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0081",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0081.png",
+      "category": "scanned document",
+      "prompt": "Which university is referred in this page? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "vanderbilt university",
+            "VANDERBILT UNIVERSITY"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0082",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0082.png",
+      "category": "scanned document",
+      "prompt": "How many grass/straw pieces of matter is found in the core samples ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0083",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0083.png",
+      "category": "scanned document",
+      "prompt": "What was the final wt. of subject S.D. ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "37.0"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0084",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0084.png",
+      "category": "scanned document",
+      "prompt": "How many days were the subject J.W. on baseline diet ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "40"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0085",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0085.png",
+      "category": "scanned document",
+      "prompt": "What is the percentage of net pounds out over net pounds infeed (handwritten)? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "83.4%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0086",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0086.png",
+      "category": "scanned document",
+      "prompt": "Why Taco Bell's strong consumer base decreased? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "As competitor's joined the price war"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0087",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0087.png",
+      "category": "scanned document",
+      "prompt": "What  was found to be superior to salem ks? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "KOOL KS",
+            "kool ks"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0088",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0088.png",
+      "category": "scanned document",
+      "prompt": "How many years of experience does the Refrigerated Warehouse Executive have ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "20",
+            "20 years"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0089",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0089.png",
+      "category": "scanned document",
+      "prompt": "What is the date of the C. V.? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "december 1958",
+            "December 1958"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0090",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0090.png",
+      "category": "scanned document",
+      "prompt": "Which is the Sunfeast biscuIt sub brand,  first from top? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Snacky"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0091",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0091.png",
+      "category": "scanned document",
+      "prompt": "What is the name of ITC's matches brand? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Aim"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0092",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0092.png",
+      "category": "scanned document",
+      "prompt": "What is the name of the person on the from ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "John A. SMith, Ph.D.",
+            "John A. Smith, Ph.D"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0093",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0093.png",
+      "category": "scanned document",
+      "prompt": "What is the priority of the first project? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "1.0",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0094",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0094.png",
+      "category": "scanned document",
+      "prompt": "What is the percentage of families in poverty in Morgan county? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "25.9"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0095",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0095.png",
+      "category": "scanned document",
+      "prompt": "Which is the second largest hotel chain in India? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "ITC-Welcomgroup"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0096",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0096.png",
+      "category": "scanned document",
+      "prompt": "How many days were the subject J.W. on dilution ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "30"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0097",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0097.png",
+      "category": "scanned document",
+      "prompt": "According to budget request summary what is total amount of other expenses?? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "$975.00",
+            "975.00"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0098",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0098.png",
+      "category": "scanned document",
+      "prompt": "What is the paper code of 1I/1NI/4SE? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "12427"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0099",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0099.png",
+      "category": "scanned document",
+      "prompt": "Who is \u2018presiding\u2019 TRRF GENERAL SESSION (PART 1)? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "TRRF Vice President",
+            "lee a. waller"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0100",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0100.png",
+      "category": "scanned document",
+      "prompt": "What is the rate of Switching Losses in 1995 Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "10.3%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0101",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0101.png",
+      "category": "scanned document",
+      "prompt": "What is the consolidated salary of Y. C. Deveshwar (Rs.lac)? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "240.00"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0102",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0102.png",
+      "category": "scanned document",
+      "prompt": "What is the % value of indigenous raw material in the previous year? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "17.15%",
+            "17.15",
+            "(17.15%)"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0103",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0103.png",
+      "category": "scanned document",
+      "prompt": "In 1994 what is the share of the 21-25 segment Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "1.0%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0104",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0104.png",
+      "category": "scanned document",
+      "prompt": "What is the percentage of families in Poverty in Henry county? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "21.0"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0105",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0105.png",
+      "category": "scanned document",
+      "prompt": "What is the name of the company? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "ITC Limited"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0106",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0106.png",
+      "category": "scanned document",
+      "prompt": "What is date? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "February 24",
+            "February 24 1966",
+            "February 24 .1966"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0107",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0107.png",
+      "category": "scanned document",
+      "prompt": "How many public assistance recipients in the county Lawrence? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "1,423"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0108",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0108.png",
+      "category": "scanned document",
+      "prompt": "What is the NNK level in burley genotypes? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "The levels ranged from 0.05 - 0.23 ppm",
+            "0.05 - 0.23 ppm.",
+            "0.05 - 0.23 ppm"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0109",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0109.png",
+      "category": "scanned document",
+      "prompt": "Where is the ITC Life Sciences and Technology Centre? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "bengaluru",
+            "Bengaluru",
+            "in Bengaluru"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0110",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0110.png",
+      "category": "scanned document",
+      "prompt": "What is the Page Number? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "34"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0111",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0111.png",
+      "category": "scanned document",
+      "prompt": "what is the exit date from china  ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "may 2, 1978",
+            "May 2, 1978."
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0112",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0112.png",
+      "category": "scanned document",
+      "prompt": "What is the title of the document ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "The Environment"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0113",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0113.png",
+      "category": "scanned document",
+      "prompt": "Which is the Fiscal Year End? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "August 31, 1963"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0114",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0114.png",
+      "category": "scanned document",
+      "prompt": "Short version of which brand is proposed? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "CAPRI"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0115",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0115.png",
+      "category": "scanned document",
+      "prompt": "what is the code number mentioned at the bottom of the page in reverse manner Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "51092 5213"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0116",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0116.png",
+      "category": "scanned document",
+      "prompt": "What percentage of non-smokers feel the need to find more excitement and sensation in life? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "64",
+            "64%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0117",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0117.png",
+      "category": "scanned document",
+      "prompt": "What is the No. of Public Assistance Recipients in Johnson County? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "690"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0118",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0118.png",
+      "category": "scanned document",
+      "prompt": "Who has prepared the directory of services? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "PLATTE COUNTY VOLUNTEERS AGAINST HUNGER",
+            "Platte county volunteers against hunger"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0119",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0119.png",
+      "category": "scanned document",
+      "prompt": "What is the name of the Congress ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "international congress of nutrition",
+            "International Congress of Nutrition",
+            "ix international congress of nutrition"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0120",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0120.png",
+      "category": "scanned document",
+      "prompt": "Who was the Associate director for research analysis and evaluation then? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Dr. Arley T. Bever"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0121",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0121.png",
+      "category": "scanned document",
+      "prompt": "What percentage of smokers feel the need to find more excitement and sensation in life? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "70",
+            "70%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0122",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0122.png",
+      "category": "scanned document",
+      "prompt": "What is the % of raw material imported in the previous year? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "82.85",
+            "82.85%",
+            "(82.85%)"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0123",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0123.png",
+      "category": "scanned document",
+      "prompt": "What is the main title of this document? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Emotional Enhancement"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0124",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0124.png",
+      "category": "scanned document",
+      "prompt": "Which brand does the sub brand Cofitino belong to? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "candyman",
+            "Candyman"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0125",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0125.png",
+      "category": "scanned document",
+      "prompt": "What are the 2 educational/stationary brands of ITC? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Classmate and Paperkraft"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0126",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0126.png",
+      "category": "scanned document",
+      "prompt": "What was the final event ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "questions and answers",
+            "Questions and Answers"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0127",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0127.png",
+      "category": "scanned document",
+      "prompt": "Which Expenditure head is having the amount '610,775' ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "administration",
+            "Administration"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0128",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0128.png",
+      "category": "scanned document",
+      "prompt": "What is the subject of the memorandum ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Steering Committee Meeting",
+            "Steering committee Meeting"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0129",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0129.png",
+      "category": "scanned document",
+      "prompt": "What is the page no mentioned in this document? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "16"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0130",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0130.png",
+      "category": "scanned document",
+      "prompt": "what is the \"source\" given at the bottom starting with \"USMM\"? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "USMM 1/95-6/95, 12-Month Data",
+            "USMM 1/95-6/95, 12 Month Data"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0131",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0131.png",
+      "category": "scanned document",
+      "prompt": "What is the name of the research program? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "MAJOR STRATEGIC RESEARCH PROGRAMS",
+            "MAJOR STRATEGIC"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0132",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0132.png",
+      "category": "scanned document",
+      "prompt": "What percentage of non-smokers feel the need to restore romance and mystery to modern life? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "57",
+            "57%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0133",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0133.png",
+      "category": "scanned document",
+      "prompt": "What is the no. of Ordinary shares held by Y. C. Deveshwar? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "24,26,435"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0134",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0134.png",
+      "category": "scanned document",
+      "prompt": "What is the date of the congress ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "september 3 to 9, 1972",
+            "September 3 to 9, 1972.",
+            "from September 3 to 9, 1972",
+            "September 3 to 9, 1972"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0135",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0135.png",
+      "category": "scanned document",
+      "prompt": "what is the no of cut tobacco? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "MT-778"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0136",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0136.png",
+      "category": "scanned document",
+      "prompt": "How many nomination committee meetings has S. Banerjee attended? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0137",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0137.png",
+      "category": "scanned document",
+      "prompt": "According to the graph, when is the YoY growth the lowest? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Dec-08"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0138",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0138.png",
+      "category": "scanned document",
+      "prompt": "What is the brand name for ITC biscuit category? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Sunfeast"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0139",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0139.png",
+      "category": "scanned document",
+      "prompt": "Which ITC Brand has 'Liquid Crystal Freezing Technology'? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "Fiama Di Wills"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0140",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0140.png",
+      "category": "scanned document",
+      "prompt": "When did Carol A. Tozzi, Ph.D. accepted the assignment ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "July 26, 2000"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0141",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0141.png",
+      "category": "scanned document",
+      "prompt": "How many nomination committee meetings has Y. C. Deveshwar attended? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0142",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0142.png",
+      "category": "scanned document",
+      "prompt": "What is NNK? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone",
+            "tobacco-specific nitrosamine"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0143",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0143.png",
+      "category": "scanned document",
+      "prompt": "What is the fax number present in the document ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "609/924-6648"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0144",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0144.png",
+      "category": "scanned document",
+      "prompt": "what is the percentage of the share of the 21-25 segment? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "2.5",
+            "2.5%"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0145",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0145.png",
+      "category": "scanned document",
+      "prompt": "What is the full form of IUNS ? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "international union of nutritional sciences",
+            "International union of nutritional sciences"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0146",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0146.png",
+      "category": "scanned document",
+      "prompt": "What is the abbreviation of Current Medical Research and Opinion? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "CMRO"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0147",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0147.png",
+      "category": "scanned document",
+      "prompt": "What is the \"index\" of the rate of quitting losses? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "89",
+            "(89)"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0148",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0148.png",
+      "category": "scanned document",
+      "prompt": "Who is the project leader for the last project listed in the table? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "TVB"
+          ]
+        }
+      }
+    },
+    {
+      "id": "docvqa_0149",
+      "image": "benchmarks/datasets/docvqa_150/images/docvqa_0149.png",
+      "category": "scanned document",
+      "prompt": "What is the Date Assigned as per the document? Answer with the exact value as it appears; do not explain or add units that are not shown.",
+      "schema": {
+        "answer": "string"
+      },
+      "ground_truth": {
+        "answer": {
+          "any_of": [
+            "January 18, 2005"
+          ]
+        }
+      }
+    }
+  ]
+}

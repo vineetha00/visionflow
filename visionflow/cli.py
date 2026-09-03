@@ -13,6 +13,7 @@ USAGE_EXTRA = """
 Subcommands:
   bench     Benchmark every backend/quantization on this machine (`vf bench --help`)
   accuracy  Measure extraction accuracy per quantization level (`vf accuracy --help`)
+  dataset   Build a labeled eval set from DocVQA/ChartQA (`vf dataset --help`)
 """
 
 
@@ -28,6 +29,10 @@ def main():
         from .accuracy import main as accuracy_main
 
         return accuracy_main(argv[1:])
+    if argv and argv[0] == "dataset":
+        from .datasets import main as dataset_main
+
+        return dataset_main(argv[1:])
 
     parser = argparse.ArgumentParser(
         prog="visionflow",

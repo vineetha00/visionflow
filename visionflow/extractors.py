@@ -49,6 +49,17 @@ class ExtractionResult:
     ok: bool = False
     error: Optional[str] = None
     constrained: bool = False
+    # Token accounting, so the constrained-vs-repair speedup can be decomposed.
+    # "Constrained decoding is faster" has two possible causes -- it skips the
+    # repair pass, and the grammar ends generation when the object closes rather
+    # than running toward the token limit. Latency alone cannot separate them.
+    new_tokens: int = 0        # tokens from the first generation
+    repair_tokens: int = 0     # tokens spent on repair passes
+    forward_passes: int = 1    # 1, or 1 + number of repair attempts made
+
+    @property
+    def total_tokens(self) -> int:
+        return self.new_tokens + self.repair_tokens
 
 
 def _strip_code_fences(text: str) -> str:

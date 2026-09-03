@@ -71,7 +71,21 @@ class AccuracyResult:
     n_fuzzy: int = 0
     n_repaired: int = 0
     mean_seconds: Optional[float] = None
+    # Token accounting, to decompose the constrained-vs-repair speedup.
+    total_new_tokens: int = 0
+    total_repair_tokens: int = 0
+    total_forward_passes: int = 0
     outcomes: list[dict] = field(default_factory=list)
+
+    @property
+    def mean_first_pass_tokens(self) -> Optional[float]:
+        return self.total_new_tokens / self.n_samples if self.n_samples else None
+
+    @property
+    def mean_total_tokens(self) -> Optional[float]:
+        if not self.n_samples:
+            return None
+        return (self.total_new_tokens + self.total_repair_tokens) / self.n_samples
 
     @property
     def schema_validity_rate(self) -> Optional[float]:
@@ -93,6 +107,8 @@ class AccuracyResult:
         d["schema_validity_ci"] = wilson_ci(self.n_schema_valid, self.n_samples)
         d["exact_accuracy_ci"] = wilson_ci(self.n_exact, self.n_fields)
         d["fuzzy_accuracy_ci"] = wilson_ci(self.n_fuzzy, self.n_fields)
+        d["mean_first_pass_tokens"] = self.mean_first_pass_tokens
+        d["mean_total_tokens"] = self.mean_total_tokens
         return d
 
 
@@ -145,6 +161,28 @@ def normalize(value) -> str:
 
 
 def score_field(expected, got) -> tuple[bool, bool, float]:
+    """Score one extracted value against ground truth.
+
+    `expected` may be `{"any_of": [...]}` to declare several acceptable answers,
+    which is how DocVQA and ChartQA annotate: the same address is ground truth
+    whether written "1128 SIXTEENTH ST., N. W." or in lowercase, and scoring
+    against only the first listed variant would charge the model for a
+    transcription convention rather than an error. The best-scoring variant wins.
+
+    A bare list is NOT treated this way -- it means the value genuinely is a
+    list (e.g. `flagged_anomalies`), and is joined before comparison. Keeping
+    "several acceptable answers" explicit avoids that ambiguity.
+    """
+    if isinstance(expected, dict) and "any_of" in expected:
+        alternatives = expected["any_of"] or [None]
+        return max(
+            (_score_one(alt, got) for alt in alternatives),
+            key=lambda t: (t[0], t[1], t[2]),
+        )
+    return _score_one(expected, got)
+
+
+def _score_one(expected, got) -> tuple[bool, bool, float]:
     e, g = normalize(expected), normalize(got)
     if not e:
         return (False, False, 0.0)
@@ -213,6 +251,9 @@ def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
         result.n_samples += 1
         if extraction.repaired:
             result.n_repaired += 1
+        result.total_new_tokens += extraction.new_tokens
+        result.total_repair_tokens += extraction.repair_tokens
+        result.total_forward_passes += extraction.forward_passes
 
         parsed = extraction.parsed if extraction.ok and isinstance(extraction.parsed, dict) else None
         # "Schema valid" means parseable AND carrying every requested key — a JSON
@@ -226,8 +267,13 @@ def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
             result.n_fields += 1
             result.n_exact += int(exact)
             result.n_fuzzy += int(fuzzy)
+            expected_str = (
+                " | ".join(str(a) for a in expected["any_of"])
+                if isinstance(expected, dict) and "any_of" in expected
+                else str(expected)
+            )
             result.outcomes.append(asdict(FieldOutcome(
-                sample_id=sample["id"], field=key, expected=str(expected),
+                sample_id=sample["id"], field=key, expected=expected_str,
                 got=None if got is None else str(got),
                 exact=exact, fuzzy=fuzzy, similarity=round(similarity, 3),
             )))
@@ -267,16 +313,40 @@ def available_configs(model_id: Optional[str] = None, include_constrained: bool 
     return out
 
 
+def _filter_configs(configs: list[dict], only: Optional[list[str]],
+                    skip: Optional[list[str]]) -> list[dict]:
+    """Case-insensitive substring filters over configuration labels.
+
+    A full sweep at a few hundred samples is hours of compute, most of it spent
+    on the CPU rows. Being able to say `--only cuda` or `--skip cpu` is what
+    makes a large labeled set practical to run at all.
+    """
+    out = configs
+    if only:
+        needles = [s.lower() for s in only]
+        out = [c for c in out if any(n in c["label"].lower() for n in needles)]
+    if skip:
+        needles = [s.lower() for s in skip]
+        out = [c for c in out if not any(n in c["label"].lower() for n in needles)]
+    return out
+
+
 def run_accuracy(
     labeled_set: Optional[str] = None,
     model_id: Optional[str] = None,
     max_new_tokens: int = 512,
     isolate: bool = True,
     include_constrained: bool = True,
+    only: Optional[list[str]] = None,
+    skip: Optional[list[str]] = None,
+    limit: Optional[int] = None,
     timeout: int = 5400,
 ) -> dict:
     samples, root = load_labeled_set(labeled_set)
+    if limit:
+        samples = samples[:limit]
     configs = available_configs(model_id, include_constrained=include_constrained)
+    configs = _filter_configs(configs, only, skip)
     results = []
 
     for config in configs:
@@ -332,14 +402,14 @@ def run_accuracy(
 def to_markdown(report: dict) -> str:
     meth = report.get("methodology", {})
     lines = [
-        "| Configuration | Quant | Schema-valid | Field acc. exact [95% CI] | Field acc. fuzzy [95% CI] | Repairs | Mean s/sample |",
-        "|---|---|---|---|---|---|---|",
+        "| Configuration | Quant | Schema-valid | Field acc. exact [95% CI] | Field acc. fuzzy [95% CI] | Repairs | Tokens/sample (1st + repair) | Mean s/sample |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     rated = []
     for r in report.get("results", []):
         if r.get("skipped"):
             lines.append(
-                f"| {r['label']} | — | *not measured — {r.get('reason', 'unavailable')}* | — | — | — | — |"
+                f"| {r['label']} | — | *not measured — {r.get('reason', 'unavailable')}* | — | — | — | — | — |"
             )
             continue
         pct = lambda v: f"{v * 100:.0f}%" if isinstance(v, (int, float)) else "—"
@@ -352,12 +422,17 @@ def to_markdown(report: dict) -> str:
             return base
 
         mean_s = r.get("mean_seconds")
+        first_tok, total_tok = r.get("mean_first_pass_tokens"), r.get("mean_total_tokens")
+        if isinstance(first_tok, (int, float)) and isinstance(total_tok, (int, float)):
+            tokens = f"{total_tok:.0f} ({first_tok:.0f} + {total_tok - first_tok:.0f})"
+        else:
+            tokens = "—"
         lines.append(
             f"| {r['label']} | {r.get('quantization') or '—'} | "
             f"{cell('schema_validity_rate', 'schema_validity_ci', 'n_schema_valid', 'n_samples')} | "
             f"{cell('exact_accuracy', 'exact_accuracy_ci', 'n_exact', 'n_fields')} | "
             f"{cell('fuzzy_accuracy', 'fuzzy_accuracy_ci', 'n_fuzzy', 'n_fields')} | "
-            f"{r.get('n_repaired', 0)} | "
+            f"{r.get('n_repaired', 0)} | {tokens} | "
             f"{f'{mean_s:.1f}' if isinstance(mean_s, (int, float)) else '—'} |"
         )
         if r.get("exact_accuracy_ci"):
@@ -412,6 +487,12 @@ def main(argv: Optional[list[str]] = None):
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--no-constrained", action="store_true",
                         help="Skip the grammar-constrained decoding comparison rows")
+    parser.add_argument("--only", nargs="*", default=None,
+                        help="Only run configurations whose label contains one of these (e.g. --only cuda)")
+    parser.add_argument("--skip", nargs="*", default=None,
+                        help="Skip configurations whose label contains one of these (e.g. --skip cpu)")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Use only the first N samples of the labeled set")
     parser.add_argument("--no-isolate", action="store_true")
     parser.add_argument("--out", default="benchmarks/results/accuracy_report.json")
     parser.add_argument("--markdown", default="benchmarks/results/accuracy_table.md")
@@ -421,6 +502,7 @@ def main(argv: Optional[list[str]] = None):
         labeled_set=args.labeled_set, model_id=args.model,
         max_new_tokens=args.max_new_tokens, isolate=not args.no_isolate,
         include_constrained=not args.no_constrained,
+        only=args.only, skip=args.skip, limit=args.limit,
     )
     table = to_markdown(report)
     print("\n" + table)

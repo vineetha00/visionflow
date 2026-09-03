@@ -198,6 +198,14 @@ Every rate is reported with a 95% Wilson confidence interval, and `vf accuracy` 
 vf accuracy
 ```
 
+For statistical power, build a larger set from a public VQA dataset. `vf dataset` materializes DocVQA (scanned business documents) or ChartQA (charts) into the same labeled-set format, using `{"any_of": [...]}` ground truth so the several acceptable answer spellings those datasets annotate all count as correct:
+
+```bash
+vf dataset docvqa -n 200 && vf accuracy --labeled-set benchmarks/datasets/docvqa_200/labeled_set.json
+```
+
+A full sweep at that size runs to hours, mostly in the CPU rows — `--only cuda`, `--skip cpu`, and `--limit N` make it tractable. The trade-off is worth knowing: those sets are one-question-one-answer VQA items, so each sample contributes a single field. They give statistical power but exercise the multi-field schema path far less than `labeled_set.json`, where field ordering and partial-object failures are visible. Run both.
+
 | Configuration | Quant | Schema-valid | Field acc. (exact) | Field acc. (fuzzy) | Repairs used | Mean s/sample |
 |---|---|---|---|---|---|---|
 | CUDA / INT4 (bnb nf4) | — | *not measured — no CUDA device on this machine* | — | — | — | — |

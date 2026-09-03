@@ -100,16 +100,24 @@ class VisionFlow:
                     self.engine.processor, prompt_len
                 )
 
-        raw = self.engine.generate_with_stats(
+        first = self.engine.generate_with_stats(
             img, wrapped_prompt, max_new_tokens=max_new_tokens,
             logits_processor=processor_factory,
-        ).text
+        )
+
+        repair_tally = {"tokens": 0, "passes": 0}
 
         def repair_fn(repair_prompt: str) -> str:
-            return self.engine.generate(img, repair_prompt, max_new_tokens=max_new_tokens)
+            stats = self.engine.generate_with_stats(img, repair_prompt, max_new_tokens=max_new_tokens)
+            repair_tally["tokens"] += stats.new_tokens
+            repair_tally["passes"] += 1
+            return stats.text
 
-        result = extract_json(raw, generate_fn=repair_fn, max_repair_attempts=max_repair_attempts)
+        result = extract_json(first.text, generate_fn=repair_fn, max_repair_attempts=max_repair_attempts)
         result.constrained = constrained
+        result.new_tokens = first.new_tokens
+        result.repair_tokens = repair_tally["tokens"]
+        result.forward_passes = 1 + repair_tally["passes"]
         return result
 
     def key_value(
