@@ -1,0 +1,2797 @@
+{
+  "methodology": {
+    "labeled_set": "benchmarks/datasets/docvqa_150/labeled_set.json",
+    "n_samples": 150,
+    "n_fields": 150,
+    "fuzzy_threshold": 0.85,
+    "max_new_tokens": 128,
+    "process_isolation": true
+  },
+  "host": {
+    "platform": "macOS-15.1-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python": "3.13.3",
+    "torch": "2.13.0",
+    "total_ram_gb": 16.0,
+    "cuda_available": false,
+    "mps_available": true
+  },
+  "results": [
+    {
+      "label": "Apple MPS / fp16",
+      "backend": "mps",
+      "model_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "constrained": false,
+      "quantization": "fp16-mps",
+      "skipped": false,
+      "reason": null,
+      "n_samples": 150,
+      "n_schema_valid": 3,
+      "n_fields": 150,
+      "n_exact": 1,
+      "n_fuzzy": 1,
+      "n_repaired": 108,
+      "mean_seconds": 9.253024694099635,
+      "total_new_tokens": 1367,
+      "total_repair_tokens": 9802,
+      "total_forward_passes": 258,
+      "outcomes": [
+        {
+          "sample_id": "docvqa_0000",
+          "field": "answer",
+          "expected": "charles d. nesbit | Charles D. Nesbit",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0001",
+          "field": "answer",
+          "expected": "6",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0002",
+          "field": "answer",
+          "expected": "0.57%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0003",
+          "field": "answer",
+          "expected": "1971",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0004",
+          "field": "answer",
+          "expected": "10:00 - 11:30 AM | 10:00 -  11:30 AM",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0005",
+          "field": "answer",
+          "expected": "1 | figure 1",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0006",
+          "field": "answer",
+          "expected": "candyman | Candyman",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0007",
+          "field": "answer",
+          "expected": "2",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0008",
+          "field": "answer",
+          "expected": "mexican government | Mexican government | the mexican government | Mexican",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0009",
+          "field": "answer",
+          "expected": "hormone replacement therapy",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0010",
+          "field": "answer",
+          "expected": "stock keeping units | Stock keeping units",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0011",
+          "field": "answer",
+          "expected": "34,500",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0012",
+          "field": "answer",
+          "expected": "1994 | October 1994",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0013",
+          "field": "answer",
+          "expected": "Fred L. Smith, Jr. | Fred L Smith jr.",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0014",
+          "field": "answer",
+          "expected": "University of Maine",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0015",
+          "field": "answer",
+          "expected": "projects | Projects",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0016",
+          "field": "answer",
+          "expected": "31 | ( 31)",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0017",
+          "field": "answer",
+          "expected": "USMM 1/95-6/95, 12-Month Data",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0018",
+          "field": "answer",
+          "expected": "Dr. Joseph C. Hwang",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0019",
+          "field": "answer",
+          "expected": "AVERAGE 1R4F RESPONSES PER S9 LOT STRAIN TA100",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0020",
+          "field": "answer",
+          "expected": "KOOL KS | Kool KS",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0021",
+          "field": "answer",
+          "expected": "12",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0022",
+          "field": "answer",
+          "expected": "For all our tomorrows | For All Our Tomorrows",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0023",
+          "field": "answer",
+          "expected": "1128 SIXTEENTH ST., N. W., WASHINGTON, D. C. 20036 | 1128 sixteenth st., N. W., washington, D. C. 20036",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0024",
+          "field": "answer",
+          "expected": "february 7, 1994 | February 7, 1994",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0025",
+          "field": "answer",
+          "expected": "Wendell Rodricks Now At Wills Lifestyle",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0026",
+          "field": "answer",
+          "expected": "6.1%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0027",
+          "field": "answer",
+          "expected": "$ 3,038,444 | 3,038,444",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0028",
+          "field": "answer",
+          "expected": "14-3006-14",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0029",
+          "field": "answer",
+          "expected": "60-1120",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0030",
+          "field": "answer",
+          "expected": "mint-o",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0031",
+          "field": "answer",
+          "expected": "Philip Morris Super Lights | philip morris super lights",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0032",
+          "field": "answer",
+          "expected": "N. Anand",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0033",
+          "field": "answer",
+          "expected": "8,899,947",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0034",
+          "field": "answer",
+          "expected": "Hongkong | HongKong",
+          "got": "Peking-Nanking",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.455
+        },
+        {
+          "sample_id": "docvqa_0035",
+          "field": "answer",
+          "expected": "Holiday Inn Downtown , Jefferson City , Missouri | Holiday Inn Downtown, Jefferson City, Missouri | Holiday Inn Downtown",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0036",
+          "field": "answer",
+          "expected": "Consumer Dynamics GPC | Consumer Dynamics",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0037",
+          "field": "answer",
+          "expected": "6",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0038",
+          "field": "answer",
+          "expected": "proprietary cellulose acetate web | their proprietary cellulose acetate web",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0039",
+          "field": "answer",
+          "expected": "ITC Limited",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0040",
+          "field": "answer",
+          "expected": "charles d. nesbit | Charles D. Nesbit | Charles D. Nesbit, IARW Chairman",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0041",
+          "field": "answer",
+          "expected": "19,000",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0042",
+          "field": "answer",
+          "expected": "20.77 | 20.77% | (20.77%)",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0043",
+          "field": "answer",
+          "expected": "c | C | consumed by control [c] | Control [C] | Control",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0044",
+          "field": "answer",
+          "expected": "31",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0045",
+          "field": "answer",
+          "expected": "29",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0046",
+          "field": "answer",
+          "expected": "Dream Cream | Dream cream",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0047",
+          "field": "answer",
+          "expected": "NNK | NNK or 4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone | 4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0048",
+          "field": "answer",
+          "expected": "Fred L. Smith, Jr. | Fred L Smith .jr",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0049",
+          "field": "answer",
+          "expected": "Carol A. Tozzi, Ph.D. | Carol A. Tozzi",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0050",
+          "field": "answer",
+          "expected": "Scissors Menthol Fresh | Menthol Fresh",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0051",
+          "field": "answer",
+          "expected": "CASED, REDR BUR FOR BEST 327391",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0052",
+          "field": "answer",
+          "expected": "questions and answers | Questions and Answers",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0053",
+          "field": "answer",
+          "expected": "KOOL 100",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0054",
+          "field": "answer",
+          "expected": "22",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0055",
+          "field": "answer",
+          "expected": "Aashirvaad",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0056",
+          "field": "answer",
+          "expected": "march 22, 1921 | March 22, 1921",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0057",
+          "field": "answer",
+          "expected": "12",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0058",
+          "field": "answer",
+          "expected": "723",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0059",
+          "field": "answer",
+          "expected": "WelcomHotel | WelComHotel",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0060",
+          "field": "answer",
+          "expected": "charles d. nesbit | Charles D. Nesbit | Charles D. Nesbit, IARW Chairman",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0061",
+          "field": "answer",
+          "expected": "50",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0062",
+          "field": "answer",
+          "expected": "BURKE | Burke",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0063",
+          "field": "answer",
+          "expected": "GENERAL FOOD FUND, INC",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0064",
+          "field": "answer",
+          "expected": "essenza di wills | Essenza Di Wills",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0065",
+          "field": "answer",
+          "expected": "seven | 7",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0066",
+          "field": "answer",
+          "expected": "Nicotine RSM Study",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0067",
+          "field": "answer",
+          "expected": "METH DEV",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0068",
+          "field": "answer",
+          "expected": "research department | Research Department",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0069",
+          "field": "answer",
+          "expected": "33,600",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0070",
+          "field": "answer",
+          "expected": "Hartsville , TN | Hartsville, TN | Hartsville , TN 37074",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0071",
+          "field": "answer",
+          "expected": "approved",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0072",
+          "field": "answer",
+          "expected": "18 million | 18 million order | the 18 million order",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0073",
+          "field": "answer",
+          "expected": "93-51954",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0074",
+          "field": "answer",
+          "expected": "Forest Products Laboratory | Forest Products Laboratory in Madison | Forest Products Laboratory in Madison, Wisconsin",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0075",
+          "field": "answer",
+          "expected": "Wills Lifestyle and John Players",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0076",
+          "field": "answer",
+          "expected": "PROJECT ASSIGNMENT FORM",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0077",
+          "field": "answer",
+          "expected": "10,000",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0078",
+          "field": "answer",
+          "expected": "the organizing committee | Organizing committee | The organizing committee",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0079",
+          "field": "answer",
+          "expected": "$ 7,265,516 | 7,265,516",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0080",
+          "field": "answer",
+          "expected": "1R4F REFERENCE RESULTS | 1R4F reference",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0081",
+          "field": "answer",
+          "expected": "vanderbilt university | VANDERBILT UNIVERSITY",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0082",
+          "field": "answer",
+          "expected": "2",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0083",
+          "field": "answer",
+          "expected": "37.0",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0084",
+          "field": "answer",
+          "expected": "40",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0085",
+          "field": "answer",
+          "expected": "83.4%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0086",
+          "field": "answer",
+          "expected": "As competitor's joined the price war",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0087",
+          "field": "answer",
+          "expected": "KOOL KS | kool ks",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0088",
+          "field": "answer",
+          "expected": "20 | 20 years",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0089",
+          "field": "answer",
+          "expected": "december 1958 | December 1958",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0090",
+          "field": "answer",
+          "expected": "Snacky",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0091",
+          "field": "answer",
+          "expected": "Aim",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0092",
+          "field": "answer",
+          "expected": "John A. SMith, Ph.D. | John A. Smith, Ph.D",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0093",
+          "field": "answer",
+          "expected": "1.0 | 1",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0094",
+          "field": "answer",
+          "expected": "25.9",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0095",
+          "field": "answer",
+          "expected": "ITC-Welcomgroup",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0096",
+          "field": "answer",
+          "expected": "30",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0097",
+          "field": "answer",
+          "expected": "$975.00 | 975.00",
+          "got": "840.00",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.5
+        },
+        {
+          "sample_id": "docvqa_0098",
+          "field": "answer",
+          "expected": "12427",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0099",
+          "field": "answer",
+          "expected": "TRRF Vice President | lee a. waller",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0100",
+          "field": "answer",
+          "expected": "10.3%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0101",
+          "field": "answer",
+          "expected": "240.00",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0102",
+          "field": "answer",
+          "expected": "17.15% | 17.15 | (17.15%)",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0103",
+          "field": "answer",
+          "expected": "1.0%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0104",
+          "field": "answer",
+          "expected": "21.0",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0105",
+          "field": "answer",
+          "expected": "ITC Limited",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0106",
+          "field": "answer",
+          "expected": "February 24 | February 24 1966 | February 24 .1966",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0107",
+          "field": "answer",
+          "expected": "1,423",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0108",
+          "field": "answer",
+          "expected": "The levels ranged from 0.05 - 0.23 ppm | 0.05 - 0.23 ppm. | 0.05 - 0.23 ppm",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0109",
+          "field": "answer",
+          "expected": "bengaluru | Bengaluru | in Bengaluru",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0110",
+          "field": "answer",
+          "expected": "34",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0111",
+          "field": "answer",
+          "expected": "may 2, 1978 | May 2, 1978.",
+          "got": "May 2, 1978",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0112",
+          "field": "answer",
+          "expected": "The Environment",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0113",
+          "field": "answer",
+          "expected": "August 31, 1963",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0114",
+          "field": "answer",
+          "expected": "CAPRI",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0115",
+          "field": "answer",
+          "expected": "51092 5213",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0116",
+          "field": "answer",
+          "expected": "64 | 64%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0117",
+          "field": "answer",
+          "expected": "690",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0118",
+          "field": "answer",
+          "expected": "PLATTE COUNTY VOLUNTEERS AGAINST HUNGER | Platte county volunteers against hunger",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0119",
+          "field": "answer",
+          "expected": "international congress of nutrition | International Congress of Nutrition | ix international congress of nutrition",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0120",
+          "field": "answer",
+          "expected": "Dr. Arley T. Bever",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0121",
+          "field": "answer",
+          "expected": "70 | 70%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0122",
+          "field": "answer",
+          "expected": "82.85 | 82.85% | (82.85%)",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0123",
+          "field": "answer",
+          "expected": "Emotional Enhancement",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0124",
+          "field": "answer",
+          "expected": "candyman | Candyman",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0125",
+          "field": "answer",
+          "expected": "Classmate and Paperkraft",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0126",
+          "field": "answer",
+          "expected": "questions and answers | Questions and Answers",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0127",
+          "field": "answer",
+          "expected": "administration | Administration",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0128",
+          "field": "answer",
+          "expected": "Steering Committee Meeting | Steering committee Meeting",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0129",
+          "field": "answer",
+          "expected": "16",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0130",
+          "field": "answer",
+          "expected": "USMM 1/95-6/95, 12-Month Data | USMM 1/95-6/95, 12 Month Data",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0131",
+          "field": "answer",
+          "expected": "MAJOR STRATEGIC RESEARCH PROGRAMS | MAJOR STRATEGIC",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0132",
+          "field": "answer",
+          "expected": "57 | 57%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0133",
+          "field": "answer",
+          "expected": "24,26,435",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0134",
+          "field": "answer",
+          "expected": "september 3 to 9, 1972 | September 3 to 9, 1972. | from September 3 to 9, 1972 | September 3 to 9, 1972",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0135",
+          "field": "answer",
+          "expected": "MT-778",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0136",
+          "field": "answer",
+          "expected": "2",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0137",
+          "field": "answer",
+          "expected": "Dec-08",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0138",
+          "field": "answer",
+          "expected": "Sunfeast",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0139",
+          "field": "answer",
+          "expected": "Fiama Di Wills",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0140",
+          "field": "answer",
+          "expected": "July 26, 2000",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0141",
+          "field": "answer",
+          "expected": "2",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0142",
+          "field": "answer",
+          "expected": "4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone | tobacco-specific nitrosamine",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0143",
+          "field": "answer",
+          "expected": "609/924-6648",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0144",
+          "field": "answer",
+          "expected": "2.5 | 2.5%",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0145",
+          "field": "answer",
+          "expected": "international union of nutritional sciences | International union of nutritional sciences",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0146",
+          "field": "answer",
+          "expected": "CMRO",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0147",
+          "field": "answer",
+          "expected": "89 | (89)",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0148",
+          "field": "answer",
+          "expected": "TVB",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0149",
+          "field": "answer",
+          "expected": "January 18, 2005",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        }
+      ],
+      "schema_validity_rate": 0.02,
+      "exact_accuracy": 0.006666666666666667,
+      "fuzzy_accuracy": 0.006666666666666667,
+      "schema_validity_ci": [
+        0.006824627715648315,
+        0.05714766586424165
+      ],
+      "exact_accuracy_ci": [
+        0.0011777710231334546,
+        0.036793752933975674
+      ],
+      "fuzzy_accuracy_ci": [
+        0.0011777710231334546,
+        0.036793752933975674
+      ],
+      "mean_first_pass_tokens": 9.113333333333333,
+      "mean_total_tokens": 74.46
+    },
+    {
+      "label": "Apple MPS / fp16 + constrained",
+      "backend": "mps",
+      "model_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "constrained": true,
+      "quantization": "fp16-mps",
+      "skipped": false,
+      "reason": null,
+      "n_samples": 150,
+      "n_schema_valid": 118,
+      "n_fields": 150,
+      "n_exact": 58,
+      "n_fuzzy": 65,
+      "n_repaired": 17,
+      "mean_seconds": 7.231135449440723,
+      "total_new_tokens": 5274,
+      "total_repair_tokens": 1938,
+      "total_forward_passes": 167,
+      "outcomes": [
+        {
+          "sample_id": "docvqa_0000",
+          "field": "answer",
+          "expected": "charles d. nesbit | Charles D. Nesbit",
+          "got": "Charles D. Nesbit",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0001",
+          "field": "answer",
+          "expected": "6",
+          "got": "6",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0002",
+          "field": "answer",
+          "expected": "0.57%",
+          "got": "0.57% Menthol And 17% Vent Was Implemented October 1994",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.167
+        },
+        {
+          "sample_id": "docvqa_0003",
+          "field": "answer",
+          "expected": "1971",
+          "got": "1969",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.5
+        },
+        {
+          "sample_id": "docvqa_0004",
+          "field": "answer",
+          "expected": "10:00 - 11:30 AM | 10:00 -  11:30 AM",
+          "got": "10:00 - 11:30 AM, Conference Room #555-6B",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.561
+        },
+        {
+          "sample_id": "docvqa_0005",
+          "field": "answer",
+          "expected": "1 | figure 1",
+          "got": "1",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0006",
+          "field": "answer",
+          "expected": "candyman | Candyman",
+          "got": "Toffichoo",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.118
+        },
+        {
+          "sample_id": "docvqa_0007",
+          "field": "answer",
+          "expected": "2",
+          "got": "3",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0008",
+          "field": "answer",
+          "expected": "mexican government | Mexican government | the mexican government | Mexican",
+          "got": "Mexican Government",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0009",
+          "field": "answer",
+          "expected": "hormone replacement therapy",
+          "got": "PREMPROP AND PREMHTHR AND PREPHOMATE",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.286
+        },
+        {
+          "sample_id": "docvqa_0010",
+          "field": "answer",
+          "expected": "stock keeping units | Stock keeping units",
+          "got": "100",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0011",
+          "field": "answer",
+          "expected": "34,500",
+          "got": "34,500",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0012",
+          "field": "answer",
+          "expected": "1994 | October 1994",
+          "got": "October 1994",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0013",
+          "field": "answer",
+          "expected": "Fred L. Smith, Jr. | Fred L Smith jr.",
+          "got": "red L. Smith, Jr.",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.971
+        },
+        {
+          "sample_id": "docvqa_0014",
+          "field": "answer",
+          "expected": "University of Maine",
+          "got": "University of Maine using 75% 1/8",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.731
+        },
+        {
+          "sample_id": "docvqa_0015",
+          "field": "answer",
+          "expected": "projects | Projects",
+          "got": "10,083",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0016",
+          "field": "answer",
+          "expected": "31 | ( 31)",
+          "got": "31",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0017",
+          "field": "answer",
+          "expected": "USMM 1/95-6/95, 12-Month Data",
+          "got": "USMM 1/95-6/95, 12-Month Data",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0018",
+          "field": "answer",
+          "expected": "Dr. Joseph C. Hwang",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0019",
+          "field": "answer",
+          "expected": "AVERAGE 1R4F RESPONSES PER S9 LOT STRAIN TA100",
+          "got": "average results for 9 s lot 0329 : 1159",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.541
+        },
+        {
+          "sample_id": "docvqa_0020",
+          "field": "answer",
+          "expected": "KOOL KS | Kool KS",
+          "got": "Monitor Results",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.364
+        },
+        {
+          "sample_id": "docvqa_0021",
+          "field": "answer",
+          "expected": "12",
+          "got": "12",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0022",
+          "field": "answer",
+          "expected": "For all our tomorrows | For All Our Tomorrows",
+          "got": "The Watershed Development Project",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.148
+        },
+        {
+          "sample_id": "docvqa_0023",
+          "field": "answer",
+          "expected": "1128 SIXTEENTH ST., N. W., WASHINGTON, D. C. 20036 | 1128 sixteenth st., N. W., washington, D. C. 20036",
+          "got": "1128 SIXTEENTH ST., N. V., WASHINGTON, D.C. 20036",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.97
+        },
+        {
+          "sample_id": "docvqa_0024",
+          "field": "answer",
+          "expected": "february 7, 1994 | February 7, 1994",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0025",
+          "field": "answer",
+          "expected": "Wendell Rodricks Now At Wills Lifestyle",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0026",
+          "field": "answer",
+          "expected": "6.1%",
+          "got": "6.19%",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.889
+        },
+        {
+          "sample_id": "docvqa_0027",
+          "field": "answer",
+          "expected": "$ 3,038,444 | 3,038,444",
+          "got": "8,899,947",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.333
+        },
+        {
+          "sample_id": "docvqa_0028",
+          "field": "answer",
+          "expected": "14-3006-14",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0029",
+          "field": "answer",
+          "expected": "60-1120",
+          "got": "60-0560",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.571
+        },
+        {
+          "sample_id": "docvqa_0030",
+          "field": "answer",
+          "expected": "mint-o",
+          "got": "tamale",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.167
+        },
+        {
+          "sample_id": "docvqa_0031",
+          "field": "answer",
+          "expected": "Philip Morris Super Lights | philip morris super lights",
+          "got": "PM Super Lights (Hong Kong)",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.566
+        },
+        {
+          "sample_id": "docvqa_0032",
+          "field": "answer",
+          "expected": "N. Anand",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0033",
+          "field": "answer",
+          "expected": "8,899,947",
+          "got": "8,899,947",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0034",
+          "field": "answer",
+          "expected": "Hongkong | HongKong",
+          "got": "Peking-Nanking",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.455
+        },
+        {
+          "sample_id": "docvqa_0035",
+          "field": "answer",
+          "expected": "Holiday Inn Downtown , Jefferson City , Missouri | Holiday Inn Downtown, Jefferson City, Missouri | Holiday Inn Downtown",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0036",
+          "field": "answer",
+          "expected": "Consumer Dynamics GPC | Consumer Dynamics",
+          "got": "Consumer Dynamics",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0037",
+          "field": "answer",
+          "expected": "6",
+          "got": "6",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0038",
+          "field": "answer",
+          "expected": "proprietary cellulose acetate web | their proprietary cellulose acetate web",
+          "got": "the patent specification from james river describing their proprietary cellulose acetate web has been requested and will be sent",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.467
+        },
+        {
+          "sample_id": "docvqa_0039",
+          "field": "answer",
+          "expected": "ITC Limited",
+          "got": "ITC Limited",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0040",
+          "field": "answer",
+          "expected": "charles d. nesbit | Charles D. Nesbit | Charles D. Nesbit, IARW Chairman",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0041",
+          "field": "answer",
+          "expected": "19,000",
+          "got": "19,000",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0042",
+          "field": "answer",
+          "expected": "20.77 | 20.77% | (20.77%)",
+          "got": "20.77%",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0043",
+          "field": "answer",
+          "expected": "c | C | consumed by control [c] | Control [C] | Control",
+          "got": "ethanol deficient [td], ethanol-fed [ET], and [td + et] groups: * food provided ad lib",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.202
+        },
+        {
+          "sample_id": "docvqa_0044",
+          "field": "answer",
+          "expected": "31",
+          "got": "31",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0045",
+          "field": "answer",
+          "expected": "29",
+          "got": "29",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0046",
+          "field": "answer",
+          "expected": "Dream Cream | Dream cream",
+          "got": "Sunfeast biscuIt",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.296
+        },
+        {
+          "sample_id": "docvqa_0047",
+          "field": "answer",
+          "expected": "NNK | NNK or 4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone | 4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone",
+          "got": "NNK",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0048",
+          "field": "answer",
+          "expected": "Fred L. Smith, Jr. | Fred L Smith .jr",
+          "got": "red L. Smith, Jr.",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.971
+        },
+        {
+          "sample_id": "docvqa_0049",
+          "field": "answer",
+          "expected": "Carol A. Tozzi, Ph.D. | Carol A. Tozzi",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0050",
+          "field": "answer",
+          "expected": "Scissors Menthol Fresh | Menthol Fresh",
+          "got": "scissors.menthol",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.789
+        },
+        {
+          "sample_id": "docvqa_0051",
+          "field": "answer",
+          "expected": "CASED, REDR BUR FOR BEST 327391",
+          "got": "Cased, Redburst for BEST 327391, BW-6068, The Burley is Redried",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.617
+        },
+        {
+          "sample_id": "docvqa_0052",
+          "field": "answer",
+          "expected": "questions and answers | Questions and Answers",
+          "got": "9:53 to 10.08 a.m.",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.205
+        },
+        {
+          "sample_id": "docvqa_0053",
+          "field": "answer",
+          "expected": "KOOL 100",
+          "got": "KOOL 100",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0054",
+          "field": "answer",
+          "expected": "22",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0055",
+          "field": "answer",
+          "expected": "Aashirvaad",
+          "got": "Aashirava Atta",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.75
+        },
+        {
+          "sample_id": "docvqa_0056",
+          "field": "answer",
+          "expected": "march 22, 1921 | March 22, 1921",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0057",
+          "field": "answer",
+          "expected": "12",
+          "got": "12",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0058",
+          "field": "answer",
+          "expected": "723",
+          "got": "27",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.4
+        },
+        {
+          "sample_id": "docvqa_0059",
+          "field": "answer",
+          "expected": "WelcomHotel | WelComHotel",
+          "got": "ITC Hotel",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.6
+        },
+        {
+          "sample_id": "docvqa_0060",
+          "field": "answer",
+          "expected": "charles d. nesbit | Charles D. Nesbit | Charles D. Nesbit, IARW Chairman",
+          "got": "Charles D. Nesbit, IARW Chairman",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0061",
+          "field": "answer",
+          "expected": "50",
+          "got": "over 50 energetic and popular brands",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.105
+        },
+        {
+          "sample_id": "docvqa_0062",
+          "field": "answer",
+          "expected": "BURKE | Burke",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0063",
+          "field": "answer",
+          "expected": "GENERAL FOOD FUND, INC",
+          "got": "General Foods Fund, Inc.",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.957
+        },
+        {
+          "sample_id": "docvqa_0064",
+          "field": "answer",
+          "expected": "essenza di wills | Essenza Di Wills",
+          "got": "fine fragrances",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.129
+        },
+        {
+          "sample_id": "docvqa_0065",
+          "field": "answer",
+          "expected": "seven | 7",
+          "got": "seven",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0066",
+          "field": "answer",
+          "expected": "Nicotine RSM Study",
+          "got": "Nicotine RSM Study",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0067",
+          "field": "answer",
+          "expected": "METH DEV",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0068",
+          "field": "answer",
+          "expected": "research department | Research Department",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0069",
+          "field": "answer",
+          "expected": "33,600",
+          "got": "33,600",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0070",
+          "field": "answer",
+          "expected": "Hartsville , TN | Hartsville, TN | Hartsville , TN 37074",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0071",
+          "field": "answer",
+          "expected": "approved",
+          "got": "Approved",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0072",
+          "field": "answer",
+          "expected": "18 million | 18 million order | the 18 million order",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0073",
+          "field": "answer",
+          "expected": "93-51954",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0074",
+          "field": "answer",
+          "expected": "Forest Products Laboratory | Forest Products Laboratory in Madison | Forest Products Laboratory in Madison, Wisconsin",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0075",
+          "field": "answer",
+          "expected": "Wills Lifestyle and John Players",
+          "got": "Lifestyle & apparel",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.51
+        },
+        {
+          "sample_id": "docvqa_0076",
+          "field": "answer",
+          "expected": "PROJECT ASSIGNMENT FORM",
+          "got": "Project Assignment Form",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0077",
+          "field": "answer",
+          "expected": "10,000",
+          "got": "35,800",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.5
+        },
+        {
+          "sample_id": "docvqa_0078",
+          "field": "answer",
+          "expected": "the organizing committee | Organizing committee | The organizing committee",
+          "got": "the organizing committee",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0079",
+          "field": "answer",
+          "expected": "$ 7,265,516 | 7,265,516",
+          "got": "7,265,516",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0080",
+          "field": "answer",
+          "expected": "1R4F REFERENCE RESULTS | 1R4F reference",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0081",
+          "field": "answer",
+          "expected": "vanderbilt university | VANDERBILT UNIVERSITY",
+          "got": "vanderbilt university",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0082",
+          "field": "answer",
+          "expected": "2",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0083",
+          "field": "answer",
+          "expected": "37.0",
+          "got": "9",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0084",
+          "field": "answer",
+          "expected": "40",
+          "got": "40",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0085",
+          "field": "answer",
+          "expected": "83.4%",
+          "got": "83.4%",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0086",
+          "field": "answer",
+          "expected": "As competitor's joined the price war",
+          "got": "As competitor's joined the price war, Taco Bell's strong consumer base decreased.",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.615
+        },
+        {
+          "sample_id": "docvqa_0087",
+          "field": "answer",
+          "expected": "KOOL KS | kool ks",
+          "got": "Kool KS Was Found To Be Superior To Salem KS Smokers",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.237
+        },
+        {
+          "sample_id": "docvqa_0088",
+          "field": "answer",
+          "expected": "20 | 20 years",
+          "got": "20 years",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0089",
+          "field": "answer",
+          "expected": "december 1958 | December 1958",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0090",
+          "field": "answer",
+          "expected": "Snacky",
+          "got": "Sunfeast",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.429
+        },
+        {
+          "sample_id": "docvqa_0091",
+          "field": "answer",
+          "expected": "Aim",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0092",
+          "field": "answer",
+          "expected": "John A. SMith, Ph.D. | John A. Smith, Ph.D",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0093",
+          "field": "answer",
+          "expected": "1.0 | 1",
+          "got": "6",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0094",
+          "field": "answer",
+          "expected": "25.9",
+          "got": "25.9",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0095",
+          "field": "answer",
+          "expected": "ITC-Welcomgroup",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0096",
+          "field": "answer",
+          "expected": "30",
+          "got": "40",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.5
+        },
+        {
+          "sample_id": "docvqa_0097",
+          "field": "answer",
+          "expected": "$975.00 | 975.00",
+          "got": "840.00",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.5
+        },
+        {
+          "sample_id": "docvqa_0098",
+          "field": "answer",
+          "expected": "12427",
+          "got": "12427",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0099",
+          "field": "answer",
+          "expected": "TRRF Vice President | lee a. waller",
+          "got": "Lee A. Waller",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0100",
+          "field": "answer",
+          "expected": "10.3%",
+          "got": "10.3%",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0101",
+          "field": "answer",
+          "expected": "240.00",
+          "got": "240.00",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0102",
+          "field": "answer",
+          "expected": "17.15% | 17.15 | (17.15%)",
+          "got": "20.77%",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.333
+        },
+        {
+          "sample_id": "docvqa_0103",
+          "field": "answer",
+          "expected": "1.0%",
+          "got": "1.0%",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0104",
+          "field": "answer",
+          "expected": "21.0",
+          "got": "21.0",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0105",
+          "field": "answer",
+          "expected": "ITC Limited",
+          "got": "ITC Limited",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0106",
+          "field": "answer",
+          "expected": "February 24 | February 24 1966 | February 24 .1966",
+          "got": "February 24",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0107",
+          "field": "answer",
+          "expected": "1,423",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0108",
+          "field": "answer",
+          "expected": "The levels ranged from 0.05 - 0.23 ppm | 0.05 - 0.23 ppm. | 0.05 - 0.23 ppm",
+          "got": "5",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.125
+        },
+        {
+          "sample_id": "docvqa_0109",
+          "field": "answer",
+          "expected": "bengaluru | Bengaluru | in Bengaluru",
+          "got": "ITC Centre",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.455
+        },
+        {
+          "sample_id": "docvqa_0110",
+          "field": "answer",
+          "expected": "34",
+          "got": "34",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0111",
+          "field": "answer",
+          "expected": "may 2, 1978 | May 2, 1978.",
+          "got": "May 2, 1978",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0112",
+          "field": "answer",
+          "expected": "The Environment",
+          "got": "The Environment",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0113",
+          "field": "answer",
+          "expected": "August 31, 1963",
+          "got": "income",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0114",
+          "field": "answer",
+          "expected": "CAPRI",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0115",
+          "field": "answer",
+          "expected": "51092 5213",
+          "got": "1",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.182
+        },
+        {
+          "sample_id": "docvqa_0116",
+          "field": "answer",
+          "expected": "64 | 64%",
+          "got": "70",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0117",
+          "field": "answer",
+          "expected": "690",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0118",
+          "field": "answer",
+          "expected": "PLATTE COUNTY VOLUNTEERS AGAINST HUNGER | Platte county volunteers against hunger",
+          "got": "Platte County Volunteers Against Manager",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.937
+        },
+        {
+          "sample_id": "docvqa_0119",
+          "field": "answer",
+          "expected": "international congress of nutrition | International Congress of Nutrition | ix international congress of nutrition",
+          "got": "XI",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.054
+        },
+        {
+          "sample_id": "docvqa_0120",
+          "field": "answer",
+          "expected": "Dr. Arley T. Bever",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0121",
+          "field": "answer",
+          "expected": "70 | 70%",
+          "got": "70",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0122",
+          "field": "answer",
+          "expected": "82.85 | 82.85% | (82.85%)",
+          "got": "2863.5",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.545
+        },
+        {
+          "sample_id": "docvqa_0123",
+          "field": "answer",
+          "expected": "Emotional Enhancement",
+          "got": "emotional enhancement",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0124",
+          "field": "answer",
+          "expected": "candyman | Candyman",
+          "got": "Cofitino",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.25
+        },
+        {
+          "sample_id": "docvqa_0125",
+          "field": "answer",
+          "expected": "Classmate and Paperkraft",
+          "got": "Williams and Supefine in the Branded spaces and Essenza Di Wills, Fia Di Fama",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.257
+        },
+        {
+          "sample_id": "docvqa_0126",
+          "field": "answer",
+          "expected": "questions and answers | Questions and Answers",
+          "got": "10:59 to 11:14 a.m.",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.2
+        },
+        {
+          "sample_id": "docvqa_0127",
+          "field": "answer",
+          "expected": "administration | Administration",
+          "got": "administration",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0128",
+          "field": "answer",
+          "expected": "Steering Committee Meeting | Steering committee Meeting",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0129",
+          "field": "answer",
+          "expected": "16",
+          "got": "16",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0130",
+          "field": "answer",
+          "expected": "USMM 1/95-6/95, 12-Month Data | USMM 1/95-6/95, 12 Month Data",
+          "got": "USMM 1/95-6/95, 12-Month Data",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0131",
+          "field": "answer",
+          "expected": "MAJOR STRATEGIC RESEARCH PROGRAMS | MAJOR STRATEGIC",
+          "got": "Nicotine RSM Study",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.242
+        },
+        {
+          "sample_id": "docvqa_0132",
+          "field": "answer",
+          "expected": "57 | 57%",
+          "got": "57",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0133",
+          "field": "answer",
+          "expected": "24,26,435",
+          "got": "24,26,435",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0134",
+          "field": "answer",
+          "expected": "september 3 to 9, 1972 | September 3 to 9, 1972. | from September 3 to 9, 1972 | September 3 to 9, 1972",
+          "got": "September 3 to 9, 1972",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0135",
+          "field": "answer",
+          "expected": "MT-778",
+          "got": "MT-778",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0136",
+          "field": "answer",
+          "expected": "2",
+          "got": "2",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0137",
+          "field": "answer",
+          "expected": "Dec-08",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0138",
+          "field": "answer",
+          "expected": "Sunfeast",
+          "got": "Sunfeast",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0139",
+          "field": "answer",
+          "expected": "Fiama Di Wills",
+          "got": "Fija Di Wills Men Aqua",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.667
+        },
+        {
+          "sample_id": "docvqa_0140",
+          "field": "answer",
+          "expected": "July 26, 2000",
+          "got": "July 26, 2000",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0141",
+          "field": "answer",
+          "expected": "2",
+          "got": "2",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0142",
+          "field": "answer",
+          "expected": "4-(methylnitrosoamino)-1-(3-pyridyl)-1-butanone | tobacco-specific nitrosamine",
+          "got": "NK or 4-(methylnitrosamino)-1-(3-pyridyl)-1-butanone",
+          "exact": false,
+          "fuzzy": true,
+          "similarity": 0.929
+        },
+        {
+          "sample_id": "docvqa_0143",
+          "field": "answer",
+          "expected": "609/924-6648",
+          "got": "609/924-6648",
+          "exact": true,
+          "fuzzy": true,
+          "similarity": 1.0
+        },
+        {
+          "sample_id": "docvqa_0144",
+          "field": "answer",
+          "expected": "2.5 | 2.5%",
+          "got": "2.5% (64)",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.615
+        },
+        {
+          "sample_id": "docvqa_0145",
+          "field": "answer",
+          "expected": "international union of nutritional sciences | International union of nutritional sciences",
+          "got": "CONGRESS UNIT OF THE CENTRO MEDICO NACIONAL IN MEXICO CITY MEDICO NACIONAL IN MEXICO City",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.394
+        },
+        {
+          "sample_id": "docvqa_0146",
+          "field": "answer",
+          "expected": "CMRO",
+          "got": "MEDLINE",
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.182
+        },
+        {
+          "sample_id": "docvqa_0147",
+          "field": "answer",
+          "expected": "89 | (89)",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0148",
+          "field": "answer",
+          "expected": "TVB",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        },
+        {
+          "sample_id": "docvqa_0149",
+          "field": "answer",
+          "expected": "January 18, 2005",
+          "got": null,
+          "exact": false,
+          "fuzzy": false,
+          "similarity": 0.0
+        }
+      ],
+      "schema_validity_rate": 0.7866666666666666,
+      "exact_accuracy": 0.38666666666666666,
+      "fuzzy_accuracy": 0.43333333333333335,
+      "schema_validity_ci": [
+        0.7143779835916132,
+        0.8446385632981747
+      ],
+      "exact_accuracy_ci": [
+        0.3124898876515768,
+        0.4665035705547861
+      ],
+      "fuzzy_accuracy_ci": [
+        0.35667455895269157,
+        0.5133215929334043
+      ],
+      "mean_first_pass_tokens": 35.16,
+      "mean_total_tokens": 48.08
+    }
+  ]
+}

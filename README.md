@@ -206,6 +206,23 @@ vf dataset docvqa -n 200 && vf accuracy --labeled-set benchmarks/datasets/docvqa
 
 A full sweep at that size runs to hours, mostly in the CPU rows — `--only cuda`, `--skip cpu`, and `--limit N` make it tractable. The trade-off is worth knowing: those sets are one-question-one-answer VQA items, so each sample contributes a single field. They give statistical power but exercise the multi-field schema path far less than `labeled_set.json`, where field ordering and partial-object failures are visible. Run both.
 
+#### DocVQA, n=150 — where constrained decoding stops being a nicety
+
+SmolVLM-256M on Apple M3 (MPS, fp16), 150 real scanned-document questions, `max_new_tokens=128`:
+
+| Configuration | Quant | Schema-valid [95% CI] | Field acc. exact [95% CI] | Field acc. fuzzy [95% CI] | Repairs | Tokens/sample (1st + repair) | Mean s/sample |
+|---|---|---|---|---|---|---|---|
+| Apple MPS / fp16 | fp16-mps | 2% (3/150) [1–6] | 1% (1/150) [0–4] | 1% (1/150) [0–4] | 108 | 74 (9 + 65) | 9.3 |
+| Apple MPS / fp16 + constrained | fp16-mps | **79%** (118/150) [71–84] | **39%** (58/150) [31–47] | **43%** (65/150) [36–51] | 17 | 48 (35 + 13) | **7.2** |
+
+**This one is not close, and unlike the 21-field tables it is statistically decisive.** Schema validity [1–6] vs [71–84] and exact accuracy [0–4] vs [31–47] — intervals nowhere near each other at n=150. Unconstrained, this model emits usable JSON on 3 of 150 real documents. Constrained, on 118. Constrained decoding is the difference between a pipeline that works and one that doesn't.
+
+**And the token column falsifies the explanation I gave earlier in this README.** I had written that constrained decoding is faster partly because "the grammar stops generation when the object closes instead of rambling toward the token limit." The data says the reverse: unconstrained first passes average **9 tokens** — not rambling, barely answering — and then spend **65 more** tokens on repair, triggered 108 times out of 150. Constrained first passes are *longer* (35 tokens) because they actually emit a JSON object, and then need only 13 repair tokens.
+
+So the speedup decomposes cleanly, and it has one cause: **avoided repair passes, not shorter generation.** Constrained decoding does more work per first pass and still finishes faster (7.2s vs 9.3s), because it almost never pays for a second forward pass. That is the kind of claim latency alone cannot support and token accounting settles.
+
+Scope this honestly: it is the 256M model on one dataset. A 2.25B model follows instructions better and would likely produce a smaller gap — the synthetic-set tables above show it needing only 1–2 repairs, not 108. What generalizes is the mechanism, not the magnitude.
+
 | Configuration | Quant | Schema-valid | Field acc. (exact) | Field acc. (fuzzy) | Repairs used | Mean s/sample |
 |---|---|---|---|---|---|---|
 | CUDA / INT4 (bnb nf4) | — | *not measured — no CUDA device on this machine* | — | — | — | — |
@@ -235,7 +252,7 @@ Raw per-field outcomes: [`benchmarks/results/accuracy_report.json`](benchmarks/r
 **What the data does support:**
 
 1. **Constrained decoding eliminates the repair pass.** Zero repairs in all six constrained runs across two architectures, against 1–2 in every unconstrained run. This is a deterministic count, not a proportion estimate, and it reproduces on Apple Silicon and NVIDIA.
-2. **Constrained decoding is faster, not slower.** INT4: 4.3s → 3.4s. CPU fp32: 92.0s → 50.9s. MPS fp16: 38.5s → 28.8s. Consistent direction, large margins, every backend. The "correctness enforcement costs latency" intuition is simply wrong on this workload.
+2. **Constrained decoding is faster, not slower.** INT4: 4.3s → 3.4s. CPU fp32: 92.0s → 50.9s. MPS fp16: 38.5s → 28.8s. Consistent direction, large margins, every backend. The "correctness enforcement costs latency" intuition is simply wrong on this workload. Token accounting on the n=150 DocVQA run (below) shows why: the saving is entirely avoided repair passes, and constrained first passes are actually *longer*.
 3. **fp16 on MPS is genuinely broken for extraction.** 5% exact [1–23] versus fp32's 76% [55–89] — the only accuracy comparison here whose intervals are nowhere near overlapping. And 4-bit NF4 on CUDA scores 38% [21–59], comfortably above 16-bit float on MPS. If precision alone explained it, 16 bits would beat 4 bits; it loses by 7×. Hardware and quantization both differ, so this isn't proof of a specific mechanism — but "fp16 is lossy" is the wrong explanation to settle on, and the MPS path should not be trusted for extraction until a per-layer activation comparison against CUDA explains it.
 
 **What the data does *not* support, despite looking like it does:**
@@ -250,7 +267,7 @@ Raw per-field outcomes: [`benchmarks/results/accuracy_report.json`](benchmarks/r
 
 **Constrained decoding eliminated the repair pass entirely** — 0 repairs in all three constrained rows, against 1–2 in every unconstrained one — and raised fuzzy field accuracy to 90% on both 2.25B configurations.
 
-**Constrained decoding was also faster, substantially.** CPU/fp32 went from 144.0s to 48.0s per sample, a 3× speedup; MPS from 38.5s to 28.8s. Two effects compound: no second forward pass for repair, and the grammar forces generation to stop when the object closes instead of rambling toward the token limit. "Correctness enforcement costs latency" is the intuition here, and on this workload it is simply wrong.
+**Constrained decoding was also faster, substantially.** CPU/fp32 went from 144.0s to 48.0s per sample, a 3× speedup; MPS from 38.5s to 28.8s. "Correctness enforcement costs latency" is the intuition here, and on this workload it is simply wrong. The n=150 DocVQA run below decomposes the cause with token counts: it is the avoided repair passes, not shorter generation.
 
 **The 256M model at 100% schema validity in 5.5s** is the deployable configuration for a Pi-class device — provided 43% exact field accuracy is acceptable for the use case, which for triage or routing it may well be and for clinical extraction it is not.
 
@@ -350,7 +367,7 @@ Only the vision encoder is exported by default: it's a single fixed-shape forwar
 ## What makes this different from just running SmolVLM
 
 1. **A benchmarking methodology, not a benchmark run** — process isolation, excluded warmup, p50/p95, tokens/sec, and explicit skip rows. The methodology section above documents *why* each choice was made, including the memory-measurement bug it was written to fix.
-2. **Correctness moved from prompting into the inference stack** — grammar-constrained decoding makes invalid JSON unrepresentable, with the repair loop demoted to a fallback for schema semantics.
+2. **Correctness moved from prompting into the inference stack** — grammar-constrained decoding makes invalid JSON unrepresentable, with the repair loop demoted to a fallback for schema semantics. On 150 real DocVQA documents this is the difference between 2% and 79% usable output, and it is *faster*.
 3. **Capability tiers per device** — model size is part of hardware auto-detection, so the same code path serves an M3 and a Pi without the user choosing a checkpoint.
 4. **Accuracy reported against quantization level, not in isolation** — schema validity and field accuracy per configuration, so the speed/accuracy trade-off is visible instead of asserted. This is what surfaced the fp16 accuracy cliff above, which a latency-only benchmark would have reported as a straight 3.7× win.
 5. **Honest about what wasn't run** — the CUDA, TensorRT, and GGUF paths are implemented and unmeasured, and they say so in every table rather than being quietly omitted.
