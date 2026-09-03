@@ -42,8 +42,11 @@ dependencies = [
 cuda = ["bitsandbytes>=0.43"]
 cpu = ["llama-cpp-python>=0.2.90"]
 eval = ["openai>=1.30", "matplotlib>=3.8", "psutil>=5.9"]
-onnx = ["onnx>=1.16", "onnxruntime>=1.18"]
-onnx-gpu = ["onnx>=1.16", "onnxruntime-gpu>=1.18"]
+# onnxscript is required by torch>=2.6's exporter, which reaches for it even on
+# the legacy torchscript path. Without it torch.onnx.export raises
+# ModuleNotFoundError and every provider row degrades to "graph not found".
+onnx = ["onnx>=1.16", "onnxruntime>=1.18", "onnxscript>=0.1"]
+onnx-gpu = ["onnx>=1.16", "onnxruntime-gpu>=1.18", "onnxscript>=0.1"]
 constrained = ["outlines>=0.1"]
 dev = ["pytest>=8.0", "pytest-cov"]
 

@@ -121,8 +121,8 @@ Model size is part of hardware detection, not a constant. A 2.25B VLM is unusabl
 
 | Device | Model tier selected | Quantization path | Status |
 |---|---|---|---|
-| NVIDIA GPU, ≥6GB VRAM | SmolVLM-2.25B | `bitsandbytes` INT4 (NF4), INT8 fallback | ⚠️ Implemented, **never run** — no NVIDIA hardware available during development |
-| NVIDIA GPU, 3–6GB VRAM | SmolVLM-500M | `bitsandbytes` INT4 | ⚠️ Same |
+| NVIDIA GPU, ≥6GB VRAM | SmolVLM-2.25B | `bitsandbytes` INT4 (NF4), INT8 fallback | ✅ Measured on an L40S — INT4 runs in 1.85GB VRAM at 47.7 tok/s. **Prefer INT4 over the INT8 fallback**: INT8 is slower *and* less accurate here |
+| NVIDIA GPU, 3–6GB VRAM | SmolVLM-500M | `bitsandbytes` INT4 | ⚠️ Implemented, not benchmarked |
 | Apple Silicon, ≥16GB | SmolVLM-2.25B | fp16 on `mps` | ✅ Measured below — **fast, but see the fp16 accuracy finding** |
 | Apple Silicon, 8–16GB | SmolVLM-500M | fp16 on `mps` | ✅ Path measured at the 256M tier below |
 | CPU / Raspberry Pi, <4GB | SmolVLM-256M | fp32, or GGUF INT4 via `llama-cpp-python` | ✅ fp32 measured below; GGUF implemented, not benchmarked |
@@ -161,6 +161,21 @@ vf bench --repeats 3 --max-new-tokens 256
 
 Host: macOS 15.1, Apple M3, 16GB RAM, torch 2.13.0. 3 images × 3 repeats, 1 warmup run excluded, `max_new_tokens=256`, each configuration in an isolated subprocess. Raw output: [`benchmarks/results/bench_report.json`](benchmarks/results/bench_report.json).
 
+#### NVIDIA L40S (USC CARC)
+
+Same harness, same images, on an L40S (Ada, 48GB, driver 580.159.04), torch 2.13.0+cu126, bitsandbytes 0.50.2:
+
+| Configuration | Model | Quant | Load (s) | p50 (s) | p95 (s) | mean ± std (s) | tok/s | Peak RSS (MB) | Device mem (MB) |
+|---|---|---|---|---|---|---|---|---|---|
+| CUDA / INT4 (bnb nf4) | SmolVLM-Instruct | int4-bnb-nf4 | 23.65 | **1.51** | 1.56 | 1.37 ± 0.25 | **47.73** | 2,007 | **1,854** |
+| CUDA / INT8 (bnb) | SmolVLM-Instruct | int8-bnb | 15.11 | 5.13 | 5.67 | 5.01 ± 0.62 | 17.82 | 3,581 | 3,009 |
+| CPU / fp32 | SmolVLM-Instruct | fp32-cpu | 19.82 | 43.42 | 79.58 | 53.19 ± 19.72 | 2.44 | 10,676 | — |
+| CPU / fp32 (SmolVLM-256M) | SmolVLM-256M-Instruct | fp32-cpu | 15.30 | 13.98 | 16.29 | 12.75 ± 3.71 | 12.03 | 2,575 | — |
+
+- **INT4 is 3.7× faster than INT8** (1.37s vs 5.01s; 47.73 vs 17.82 tok/s) and uses 1.6× less device memory. That ordering is backwards from the intuition that fewer bits means more reconstruction work — `bitsandbytes`' LLM.int8() path carries a well-known dequantization overhead, and here it costs more than the precision is worth. See the accuracy table: INT8 doesn't buy accuracy either.
+- **INT4 on an L40S is 19.7× faster per sample than fp16 on the M3** (1.37s vs 26.94s) and 7.2× on tokens/sec, in 1.85GB of VRAM.
+- **CPU fp32 has the widest p95/p50 spread of anything measured** (79.58 vs 43.42). CPU inference is the most sensitive to output-length variation because there's no parallel headroom to absorb it.
+
 Reading this table:
 
 - **MPS is 5.3× faster than CPU on the same 2.25B weights** (26.9s vs 144.0s mean; 6.62 vs 0.90 tok/s). That gap is the whole argument for the fp16-on-MPS path over a CPU fallback.
@@ -193,6 +208,29 @@ vf accuracy
 | MPS / fp16 (SmolVLM-256M) + constrained | fp16-mps | **100%** (3/3) | 43% (9/21) | 48% (10/21) | **0** | 5.5 |
 
 Raw per-field outcomes: [`benchmarks/results/accuracy_report.json`](benchmarks/results/accuracy_report.json).
+
+#### NVIDIA L40S (USC CARC)
+
+| Configuration | Quant | Schema-valid | Field acc. (exact) | Field acc. (fuzzy) | Repairs used | Mean s/sample |
+|---|---|---|---|---|---|---|
+| CUDA / INT4 (bnb nf4) | int4-bnb-nf4 | 67% (2/3) | 38% (8/21) | 57% (12/21) | 2 | 4.3 |
+| CUDA / INT8 (bnb) | int8-bnb | 33% (1/3) | 29% (6/21) | 29% (6/21) | 2 | 11.5 |
+| CPU / fp32 | fp32-cpu | 67% (2/3) | **76%** (16/21) | 76% (16/21) | 2 | 92.0 |
+| CUDA / INT4 + constrained | int4-bnb-nf4 | **100%** (3/3) | 43% (9/21) | 81% (17/21) | **0** | **3.4** |
+| CUDA / INT8 + constrained | int8-bnb | 67% (2/3) | 48% (10/21) | 86% (18/21) | **0** | 6.8 |
+| CPU / fp32 + constrained | fp32-cpu | 67% (2/3) | 71% (15/21) | **90%** (19/21) | **0** | 50.9 |
+
+Four findings, in order of how much they should change your deployment:
+
+**1. Quantization costs real accuracy on this task. "Quantized matches full precision" is not supported here.** fp32 reaches 76% exact field accuracy; the best quantized configuration reaches 48%. If you are extracting an MRN or a lot number, that gap is the difference between usable and not. This is the claim most VLM-quantization projects assert without a baseline, and measuring it honestly is the reason this table exists.
+
+**2. INT8 is worse than INT4 on both axes — slower *and* less accurate** (29% vs 38% exact unconstrained; 11.5s vs 4.3s). That is backwards from what "more bits" implies, and it means the INT8 fallback path in `engine.py` is not a safe "if INT4 struggles" option for this model. Caveat firmly: 21 fields is small, and this is one seed. But it reproduces the direction seen in the latency table, where INT8 was also 3.7× slower.
+
+**3. Constrained decoding wins everywhere, again, on a completely different backend.** Zero repair passes across all three constrained rows. INT4 + constrained is the only configuration to reach **100% schema validity**, and it is also the **fastest thing measured anywhere in this project** at 3.4s/sample — faster than its own unconstrained counterpart (4.3s), on a second architecture. The "correctness enforcement costs latency" intuition is now wrong on both Apple Silicon and NVIDIA.
+
+**4. It reframes the fp16-on-MPS result, and the earlier reading was probably too generous to it.** fp16 on MPS scored 5% exact. INT4 on CUDA — *four* bits, vastly coarser — scores 38%. If precision alone drove the earlier gap, 16-bit floats should comfortably beat 4-bit integers, and they do the opposite by 7×. That points at something specific to the MPS backend's numerics rather than to fp16 as such. Two variables move at once here (hardware and quantization), so this isn't proof; it does mean "fp16 is lossy" is the wrong explanation to settle on, and the MPS path deserves a per-layer activation comparison against CUDA before it is trusted for extraction.
+
+**The deployment read:** INT4 + constrained at 3.4s and 100% schema validity is the right default for throughput, and fp32 at 76% exact is the right default when field-level correctness matters more than latency. Nothing here supports running fp16 on MPS for extraction work.
 
 **The headline result is uncomfortable, so it goes first: the fast path is the inaccurate one.** On identical weights and prompts, fp32 on CPU scores 76% exact field accuracy against fp16 on MPS's 5% — while being 3.7× slower. That is not a rounding difference, it's a different quality tier. The likely cause is fp16 range loss in the vision tower degrading the image features, which is a known hazard for fp16 inference on some architectures; this benchmark measures it but does not prove the mechanism. Anyone deploying the MPS path should treat this as the finding that matters most, and it is exactly the kind of result a speed-only benchmark would never surface.
 
@@ -240,9 +278,9 @@ Reproduce: `python examples/constrained_extraction.py`
 | Path | Status |
 |---|---|
 | ONNX export of the vision encoder | ✅ Verified on Apple M3 — max abs. difference vs PyTorch = **5.04e-04** |
-| `CPUExecutionProvider` | ✅ Measured |
-| `CUDAExecutionProvider` | ⚠️ **Implemented, never run** — not in this `onnxruntime` build; no NVIDIA hardware available |
-| `TensorrtExecutionProvider` | ⚠️ **Implemented, never run** — same |
+| `CPUExecutionProvider` | ✅ Measured on Apple M3 |
+| `CUDAExecutionProvider` | ⚠️ **Available but not yet measured** — present in ORT 1.29 on the CARC L40S; the run's export stage failed on a missing `onnxscript` |
+| `TensorrtExecutionProvider` | ⚠️ **Available but not yet measured** — same; ORT registered the provider, so this is pending a re-run, not missing hardware |
 | `CoreMLExecutionProvider` | Available but excluded by default — see below |
 | Full-model export (decoder + KV cache) | Delegated to `optimum.exporters.onnx`; not exercised here |
 
@@ -331,8 +369,10 @@ visionflow/
 
 Listed here rather than discovered later:
 
-- **The fp16-on-MPS accuracy drop is measured but not explained.** 5% vs 76% exact accuracy against fp32 on identical weights is a large enough gap that it deserves a root-cause investigation (per-layer activation range analysis on the vision tower) before the MPS path is trusted for extraction. It is not fixed here.
-- **No NVIDIA measurements.** The INT4/INT8 bitsandbytes paths and both GPU execution providers are implemented and untested on real hardware. Note that the fp16 finding above makes the untested INT4/INT8 accuracy question more pressing, not less.
+- **The fp16-on-MPS accuracy drop is measured but not explained**, and the L40S run makes it stranger rather than clearer: 4-bit NF4 on CUDA beats 16-bit float on MPS by 7× on exact accuracy. That rules out "fp16 is simply lossy" as a sufficient explanation and points at MPS backend numerics, but two variables move at once and it is not proven. Needs a per-layer activation comparison between the MPS and CUDA vision towers. Not fixed here.
+- **INT8 being worse than INT4 on both speed and accuracy is a single-seed result on 21 fields.** The direction is consistent across the latency and accuracy tables, but it should be re-run with more samples before being treated as a general property of `bitsandbytes` LLM.int8().
+- **No TensorRT or CUDA execution-provider numbers yet.** The L40S run's ONNX stage failed on a missing `onnxscript` (now added to the `[onnx]` extras), so the export never happened and all three provider rows recorded "graph not found". The providers themselves *are* present in that environment — ORT 1.29 registered `TensorrtExecutionProvider` — so this is a packaging fix away, not a hardware limitation.
+- **The 500M tier and the 256M-on-CUDA combination remain unbenchmarked.**
 - **The labeled set is 3 images.** Enough to compare configurations, not enough to state an absolute accuracy figure.
 - **No GPT-4o Vision baseline was run.** `eval.py` implements the comparison; it requires `OPENAI_API_KEY` and reports `ran: false` with a reason when the key is absent, rather than fabricating a score.
 - **GGUF/llama.cpp path unbenchmarked.** Implemented in `quantize.py` including GBNF grammar wiring; no numbers.
