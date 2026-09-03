@@ -192,6 +192,8 @@ Ground truth is the literal text drawn into the synthetic sample images by `exam
 
 Two accuracy columns, because either alone misleads: a 2B VLM reading a scanned document routinely drops one character from a long identifier (`SYN-0041729` for `SYN-00417293`). Exact match scores that a total failure; fuzzy match (character similarity ≥ 0.85) scores it a near-miss. The truth is in between.
 
+Every rate is reported with a 95% Wilson confidence interval, and `vf accuracy` prints an explicit "not statistically distinguishable" line naming the configurations whose intervals overlap the leader's. That line exists because ranking configurations off point estimates is the default way to misread a table like this — and because an earlier draft of this README did exactly that.
+
 ```bash
 vf accuracy
 ```
@@ -211,26 +213,30 @@ Raw per-field outcomes: [`benchmarks/results/accuracy_report.json`](benchmarks/r
 
 #### NVIDIA L40S (USC CARC)
 
-| Configuration | Quant | Schema-valid | Field acc. (exact) | Field acc. (fuzzy) | Repairs used | Mean s/sample |
+| Configuration | Quant | Schema-valid [95% CI] | Field acc. exact [95% CI] | Field acc. fuzzy [95% CI] | Repairs | Mean s/sample |
 |---|---|---|---|---|---|---|
-| CUDA / INT4 (bnb nf4) | int4-bnb-nf4 | 67% (2/3) | 38% (8/21) | 57% (12/21) | 2 | 4.3 |
-| CUDA / INT8 (bnb) | int8-bnb | 33% (1/3) | 29% (6/21) | 29% (6/21) | 2 | 11.5 |
-| CPU / fp32 | fp32-cpu | 67% (2/3) | **76%** (16/21) | 76% (16/21) | 2 | 92.0 |
-| CUDA / INT4 + constrained | int4-bnb-nf4 | **100%** (3/3) | 43% (9/21) | 81% (17/21) | **0** | **3.4** |
-| CUDA / INT8 + constrained | int8-bnb | 67% (2/3) | 48% (10/21) | 86% (18/21) | **0** | 6.8 |
-| CPU / fp32 + constrained | fp32-cpu | 67% (2/3) | 71% (15/21) | **90%** (19/21) | **0** | 50.9 |
+| CUDA / INT4 (bnb nf4) | int4-bnb-nf4 | 67% (2/3) [21–94] | 38% (8/21) [21–59] | 57% (12/21) [36–75] | 2 | 4.3 |
+| CUDA / INT8 (bnb) | int8-bnb | 33% (1/3) [6–79] | 29% (6/21) [14–50] | 29% (6/21) [14–50] | 2 | 11.5 |
+| CPU / fp32 | fp32-cpu | 67% (2/3) [21–94] | 76% (16/21) [55–89] | 76% (16/21) [55–89] | 2 | 92.0 |
+| CUDA / INT4 + constrained | int4-bnb-nf4 | 100% (3/3) [44–100] | 43% (9/21) [24–63] | 81% (17/21) [60–92] | **0** | **3.4** |
+| CUDA / INT8 + constrained | int8-bnb | 67% (2/3) [21–94] | 48% (10/21) [28–68] | 86% (18/21) [65–95] | **0** | 6.8 |
+| CPU / fp32 + constrained | fp32-cpu | 67% (2/3) [21–94] | 71% (15/21) [50–86] | 90% (19/21) [70–97] | **0** | 50.9 |
 
-Four findings, in order of how much they should change your deployment:
+**Read the intervals before the point estimates.** At 21 fields, one field is 4.8 percentage points and most of the gaps in this table are one or two fields. An earlier draft of this README ranked these configurations off point estimates and drew three conclusions that its own data does not support. Corrected:
 
-**1. Quantization costs real accuracy on this task. "Quantized matches full precision" is not supported here.** fp32 reaches 76% exact field accuracy; the best quantized configuration reaches 48%. If you are extracting an MRN or a lot number, that gap is the difference between usable and not. This is the claim most VLM-quantization projects assert without a baseline, and measuring it honestly is the reason this table exists.
+**What the data does support:**
 
-**2. INT8 is worse than INT4 on both axes — slower *and* less accurate** (29% vs 38% exact unconstrained; 11.5s vs 4.3s). That is backwards from what "more bits" implies, and it means the INT8 fallback path in `engine.py` is not a safe "if INT4 struggles" option for this model. Caveat firmly: 21 fields is small, and this is one seed. But it reproduces the direction seen in the latency table, where INT8 was also 3.7× slower.
+1. **Constrained decoding eliminates the repair pass.** Zero repairs in all six constrained runs across two architectures, against 1–2 in every unconstrained run. This is a deterministic count, not a proportion estimate, and it reproduces on Apple Silicon and NVIDIA.
+2. **Constrained decoding is faster, not slower.** INT4: 4.3s → 3.4s. CPU fp32: 92.0s → 50.9s. MPS fp16: 38.5s → 28.8s. Consistent direction, large margins, every backend. The "correctness enforcement costs latency" intuition is simply wrong on this workload.
+3. **fp16 on MPS is genuinely broken for extraction.** 5% exact [1–23] versus fp32's 76% [55–89] — the only accuracy comparison here whose intervals are nowhere near overlapping. And 4-bit NF4 on CUDA scores 38% [21–59], comfortably above 16-bit float on MPS. If precision alone explained it, 16 bits would beat 4 bits; it loses by 7×. Hardware and quantization both differ, so this isn't proof of a specific mechanism — but "fp16 is lossy" is the wrong explanation to settle on, and the MPS path should not be trusted for extraction until a per-layer activation comparison against CUDA explains it.
 
-**3. Constrained decoding wins everywhere, again, on a completely different backend.** Zero repair passes across all three constrained rows. INT4 + constrained is the only configuration to reach **100% schema validity**, and it is also the **fastest thing measured anywhere in this project** at 3.4s/sample — faster than its own unconstrained counterpart (4.3s), on a second architecture. The "correctness enforcement costs latency" intuition is now wrong on both Apple Silicon and NVIDIA.
+**What the data does *not* support, despite looking like it does:**
 
-**4. It reframes the fp16-on-MPS result, and the earlier reading was probably too generous to it.** fp16 on MPS scored 5% exact. INT4 on CUDA — *four* bits, vastly coarser — scores 38%. If precision alone drove the earlier gap, 16-bit floats should comfortably beat 4-bit integers, and they do the opposite by 7×. That points at something specific to the MPS backend's numerics rather than to fp16 as such. Two variables move at once here (hardware and quantization), so this isn't proof; it does mean "fp16 is lossy" is the wrong explanation to settle on, and the MPS path deserves a per-layer activation comparison against CUDA before it is trusted for extraction.
+4. **INT8 vs INT4 on accuracy.** 29% [14–50] vs 38% [21–59] — a two-field difference with almost entirely overlapping intervals. The *latency* difference is solid (11.5s vs 4.3s, and 3.7× in the table above, with tight per-run variance), so "prefer INT4" remains the right call on speed and memory alone. But the accuracy claim needs a bigger set.
+5. **"Quantization costs accuracy" at the magnitude it appears to.** fp32 76% [55–89] vs INT4 38% [21–59] overlap at the margin. The direction is plausible and matches the fp16 finding, but at this sample size it falls short of significance. What is safe to say: *nothing here demonstrates that quantization is free*, which is the claim most VLM-quantization projects make without a baseline at all.
+6. **Any schema-validity comparison.** n=3 documents. "100%" carries a confidence interval of [44–100]. That column is a smoke test, not a measurement.
 
-**The deployment read:** INT4 + constrained at 3.4s and 100% schema validity is the right default for throughput, and fp32 at 76% exact is the right default when field-level correctness matters more than latency. Nothing here supports running fp16 on MPS for extraction work.
+**The deployment read:** INT4 + constrained is the throughput default — fastest measured anywhere here at 3.4s/sample, with zero repair passes and 1.85GB VRAM. Use fp32 when field-level correctness matters more than latency; the evidence for that preference is directional rather than conclusive, but it points one way consistently. Do not use fp16 on MPS for extraction.
 
 **The headline result is uncomfortable, so it goes first: the fast path is the inaccurate one.** On identical weights and prompts, fp32 on CPU scores 76% exact field accuracy against fp16 on MPS's 5% — while being 3.7× slower. That is not a rounding difference, it's a different quality tier. The likely cause is fp16 range loss in the vision tower degrading the image features, which is a known hazard for fp16 inference on some architectures; this benchmark measures it but does not prove the mechanism. Anyone deploying the MPS path should treat this as the finding that matters most, and it is exactly the kind of result a speed-only benchmark would never surface.
 
@@ -370,7 +376,7 @@ visionflow/
 Listed here rather than discovered later:
 
 - **The fp16-on-MPS accuracy drop is measured but not explained**, and the L40S run makes it stranger rather than clearer: 4-bit NF4 on CUDA beats 16-bit float on MPS by 7× on exact accuracy. That rules out "fp16 is simply lossy" as a sufficient explanation and points at MPS backend numerics, but two variables move at once and it is not proven. Needs a per-layer activation comparison between the MPS and CUDA vision towers. Not fixed here.
-- **INT8 being worse than INT4 on both speed and accuracy is a single-seed result on 21 fields.** The direction is consistent across the latency and accuracy tables, but it should be re-run with more samples before being treated as a general property of `bitsandbytes` LLM.int8().
+- **The labeled set is far too small to separate most configurations, and this is now the binding constraint on the whole project.** At n=21 fields, only one accuracy comparison in the entire results section clears its confidence intervals (fp32 vs fp16-on-MPS). INT8-vs-INT4 and fp32-vs-INT4 both fail significance, and schema validity at n=3 documents is uninformative. Scaling to a few hundred labeled fields (a DocVQA/ChartQA subset) would upgrade five currently-directional claims into measurements, and is the single highest-value next step here.
 - **No TensorRT or CUDA execution-provider numbers yet.** The L40S run's ONNX stage failed on a missing `onnxscript` (now added to the `[onnx]` extras), so the export never happened and all three provider rows recorded "graph not found". The providers themselves *are* present in that environment — ORT 1.29 registered `TensorrtExecutionProvider` — so this is a packaging fix away, not a hardware limitation.
 - **The 500M tier and the 256M-on-CUDA combination remain unbenchmarked.**
 - **The labeled set is 3 images.** Enough to compare configurations, not enough to state an absolute accuracy figure.

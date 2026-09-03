@@ -90,7 +90,39 @@ class AccuracyResult:
         d["schema_validity_rate"] = self.schema_validity_rate
         d["exact_accuracy"] = self.exact_accuracy
         d["fuzzy_accuracy"] = self.fuzzy_accuracy
+        d["schema_validity_ci"] = wilson_ci(self.n_schema_valid, self.n_samples)
+        d["exact_accuracy_ci"] = wilson_ci(self.n_exact, self.n_fields)
+        d["fuzzy_accuracy_ci"] = wilson_ci(self.n_fuzzy, self.n_fields)
         return d
+
+
+def wilson_ci(successes: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """95% Wilson score interval for a binomial proportion.
+
+    Reported alongside every rate in this module because the labeled set is
+    small enough that point estimates mislead badly. At n=21 fields, one field
+    is 4.8 percentage points: a 38%-vs-29% difference between two quantization
+    levels is two fields, and its confidence intervals ([21-59] and [14-50])
+    overlap almost entirely. Publishing the point estimates alone invites a
+    conclusion the data cannot support.
+
+    Wilson rather than the normal approximation because the latter is badly
+    behaved exactly where this set lives -- small n and proportions near 0 or 1,
+    where it produces intervals extending past 0% or 100%.
+    """
+    if n == 0:
+        return (0.0, 0.0)
+    p = successes / n
+    denom = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / denom
+    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / denom
+    return (max(0.0, centre - half), min(1.0, centre + half))
+
+
+def overlaps(a: tuple[float, float], b: tuple[float, float]) -> bool:
+    """Do two confidence intervals overlap? If so, the difference between the
+    corresponding point estimates is not statistically distinguishable."""
+    return a[0] <= b[1] and b[0] <= a[1]
 
 
 _DASHES = dict.fromkeys(map(ord, "‐‑‒–—―−"), "-")
@@ -300,9 +332,10 @@ def run_accuracy(
 def to_markdown(report: dict) -> str:
     meth = report.get("methodology", {})
     lines = [
-        "| Configuration | Quant | Schema-valid | Field acc. (exact) | Field acc. (fuzzy) | Repairs used | Mean s/sample |",
+        "| Configuration | Quant | Schema-valid | Field acc. exact [95% CI] | Field acc. fuzzy [95% CI] | Repairs | Mean s/sample |",
         "|---|---|---|---|---|---|---|",
     ]
+    rated = []
     for r in report.get("results", []):
         if r.get("skipped"):
             lines.append(
@@ -310,22 +343,50 @@ def to_markdown(report: dict) -> str:
             )
             continue
         pct = lambda v: f"{v * 100:.0f}%" if isinstance(v, (int, float)) else "—"
+
+        def cell(rate_key, ci_key, num_key, den_key):
+            rate, ci = r.get(rate_key), r.get(ci_key)
+            base = f"{pct(rate)} ({r.get(num_key, 0)}/{r.get(den_key, 0)})"
+            if ci:
+                base += f" [{ci[0] * 100:.0f}–{ci[1] * 100:.0f}]"
+            return base
+
         mean_s = r.get("mean_seconds")
         lines.append(
             f"| {r['label']} | {r.get('quantization') or '—'} | "
-            f"{pct(r.get('schema_validity_rate'))} ({r.get('n_schema_valid', 0)}/{r.get('n_samples', 0)}) | "
-            f"{pct(r.get('exact_accuracy'))} ({r.get('n_exact', 0)}/{r.get('n_fields', 0)}) | "
-            f"{pct(r.get('fuzzy_accuracy'))} ({r.get('n_fuzzy', 0)}/{r.get('n_fields', 0)}) | "
+            f"{cell('schema_validity_rate', 'schema_validity_ci', 'n_schema_valid', 'n_samples')} | "
+            f"{cell('exact_accuracy', 'exact_accuracy_ci', 'n_exact', 'n_fields')} | "
+            f"{cell('fuzzy_accuracy', 'fuzzy_accuracy_ci', 'n_fuzzy', 'n_fields')} | "
             f"{r.get('n_repaired', 0)} | "
             f"{f'{mean_s:.1f}' if isinstance(mean_s, (int, float)) else '—'} |"
         )
+        if r.get("exact_accuracy_ci"):
+            rated.append((r["label"], r.get("exact_accuracy"), tuple(r["exact_accuracy_ci"])))
+
     lines.append(
         f"\n{meth.get('n_samples', '?')} images / {meth.get('n_fields', '?')} labeled fields. "
         f"Exact = normalized string equality; fuzzy = character similarity ≥ "
         f"{meth.get('fuzzy_threshold', FUZZY_THRESHOLD)}. "
         "\"Schema-valid\" requires parseable JSON containing every requested key. "
-        "Each configuration measured in an isolated subprocess.\n"
+        "Each configuration measured in an isolated subprocess. "
+        "Bracketed ranges are 95% Wilson intervals."
     )
+
+    # Spell out which comparisons the sample size can actually support. Reading
+    # rank order off point estimates is the default failure mode of a table like
+    # this one, and at n=21 most of these differences are one or two fields.
+    if len(rated) > 1:
+        best = max(rated, key=lambda t: t[1] if t[1] is not None else -1)
+        indistinct = [lbl for lbl, _, ci in rated
+                      if lbl != best[0] and overlaps(ci, best[2])]
+        if indistinct:
+            lines.append(
+                f"\n**Not statistically distinguishable.** The top configuration by point estimate "
+                f"is *{best[0]}* ({best[1] * 100:.0f}%), but its confidence interval overlaps "
+                f"{'that of' if len(indistinct) == 1 else 'those of'}: {', '.join(indistinct)}. "
+                f"With this sample size those differences are not evidence of a real gap."
+            )
+    lines.append("")
     return "\n".join(lines)
 
 

@@ -115,6 +115,56 @@ def test_accuracy_rates_are_none_before_any_samples():
     assert r.schema_validity_rate is None and r.exact_accuracy is None
 
 
+def test_wilson_ci_bounds_are_sane():
+    from visionflow.accuracy import wilson_ci
+
+    assert wilson_ci(0, 0) == (0.0, 0.0)
+    lo, hi = wilson_ci(21, 21)
+    assert hi > 0.999 and 0.8 < lo < 1.0        # never exceeds 1 even at p=1
+    lo, hi = wilson_ci(0, 21)
+    assert lo == 0.0 and hi < 0.2               # never below 0 even at p=0
+    lo, hi = wilson_ci(8, 21)
+    assert lo < 8 / 21 < hi
+
+
+def test_overlap_detects_indistinguishable_configurations():
+    """The differences this project reports are small and the sample is 21 fields.
+    These are the actual measured counts: INT4 (8/21) vs INT8 (6/21) must come out
+    indistinguishable, while fp32 (16/21) vs fp16-on-MPS (1/21) must not."""
+    from visionflow.accuracy import overlaps, wilson_ci
+
+    assert overlaps(wilson_ci(8, 21), wilson_ci(6, 21))
+    assert overlaps(wilson_ci(16, 21), wilson_ci(8, 21))     # fp32 vs INT4: marginal
+    assert not overlaps(wilson_ci(16, 21), wilson_ci(1, 21))  # fp32 vs MPS fp16: real
+
+
+def test_accuracy_markdown_flags_overlapping_configurations():
+    report = {
+        "methodology": {"n_samples": 3, "n_fields": 21, "fuzzy_threshold": 0.85},
+        "results": [
+            {"label": "INT4", "quantization": "int4", "n_samples": 3, "n_fields": 21,
+             "n_exact": 8, "n_fuzzy": 12, "n_schema_valid": 2, "n_repaired": 2,
+             "exact_accuracy": 8 / 21, "exact_accuracy_ci": [0.21, 0.59],
+             "fuzzy_accuracy": 12 / 21, "fuzzy_accuracy_ci": [0.36, 0.75],
+             "schema_validity_rate": 2 / 3, "schema_validity_ci": [0.21, 0.94],
+             "mean_seconds": 4.3},
+            {"label": "INT8", "quantization": "int8", "n_samples": 3, "n_fields": 21,
+             "n_exact": 6, "n_fuzzy": 6, "n_schema_valid": 1, "n_repaired": 2,
+             "exact_accuracy": 6 / 21, "exact_accuracy_ci": [0.14, 0.50],
+             "fuzzy_accuracy": 6 / 21, "fuzzy_accuracy_ci": [0.14, 0.50],
+             "schema_validity_rate": 1 / 3, "schema_validity_ci": [0.06, 0.79],
+             "mean_seconds": 11.5},
+        ],
+    }
+    table = accuracy_markdown(report)
+    assert "95% Wilson" in table
+    assert "[21–59]" in table
+    # The table must say out loud that the leader is not separable from INT8,
+    # rather than leaving a reader to rank on point estimates alone.
+    assert "Not statistically distinguishable" in table
+    assert "INT8" in table.split("Not statistically distinguishable")[1]
+
+
 def test_accuracy_markdown_reports_skip_reason():
     report = {
         "methodology": {"n_samples": 3, "n_fields": 21, "fuzzy_threshold": 0.85},
