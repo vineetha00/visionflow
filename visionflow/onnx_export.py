@@ -9,6 +9,15 @@
     available during development.
   - TensorRT execution provider: *implemented, never run.* Same reason.
 
+**Matching onnxruntime-gpu to your CUDA module matters, and the failure is
+quiet.** ORT wheels are built against a specific CUDA major version -- 1.29
+against CUDA 13 (`libcublas.so.13`), earlier releases against CUDA 12. Load the
+wrong one and `get_available_providers()` still lists TensorRT, because the
+provider shared object is present; it only fails when a session is created, at
+which point ORT falls back to CPU and keeps going. A harness that trusted the
+provider list would publish CPU latency as a TensorRT result. That is why
+`provider_used` is read back from the live session and any mismatch is flagged.
+
 The TensorRT path is written from the ORT provider API rather than from measured
 experience, and it is labelled that way in the README benchmark table instead of
 being presented as a result. To earn those numbers, run this module's `--benchmark`
@@ -71,6 +80,7 @@ class OnnxBenchResult:
     ok: bool = False
     reason: Optional[str] = None
     n_runs: int = 0
+    threads: Optional[int] = None
     latencies_ms: list[float] = field(default_factory=list)
     mean_ms: Optional[float] = None
     p50_ms: Optional[float] = None
@@ -86,6 +96,24 @@ class OnnxBenchResult:
         self.mean_ms = sum(ordered) / len(ordered)
         self.p50_ms = _percentile(ordered, 50)
         self.p95_ms = _percentile(ordered, 95)
+
+
+def _thread_budget() -> int:
+    """Threads ORT may use: the Slurm allocation if there is one, else the CPU count.
+
+    `os.cpu_count()` reports the machine's cores, not the job's share, so on a
+    shared node it over-subscribes and the numbers stop being comparable.
+    """
+    import os
+
+    for var in ("SLURM_CPUS_PER_TASK", "OMP_NUM_THREADS"):
+        value = os.environ.get(var)
+        if value and value.isdigit() and int(value) > 0:
+            return int(value)
+    try:
+        return len(os.sched_getaffinity(0))
+    except AttributeError:  # macOS has no sched_getaffinity
+        return os.cpu_count() or 4
 
 
 def available_providers() -> list[str]:
@@ -344,7 +372,19 @@ def benchmark_onnx(
             results.append(result)
             continue
         try:
-            session = ort.InferenceSession(onnx_path, providers=[provider, "CPUExecutionProvider"])
+            # Pin the thread count explicitly. Under Slurm the process runs in a
+            # restricted cpuset, and ORT's default affinity pinning then fails
+            # once per thread -- on a 64-core node that is ~130 lines of
+            # pthread_setaffinity_np errors per session, which buries the actual
+            # result. Setting it also makes CPU-provider timings reproducible
+            # instead of varying with whatever core count the scheduler handed out.
+            options = ort.SessionOptions()
+            options.intra_op_num_threads = _thread_budget()
+            session = ort.InferenceSession(
+                onnx_path, sess_options=options,
+                providers=[provider, "CPUExecutionProvider"],
+            )
+            result.threads = options.intra_op_num_threads
             result.provider_used = session.get_providers()[0]
             if result.provider_used != provider:
                 result.reason = f"ORT fell back to {result.provider_used}; this is NOT a {provider} measurement"
