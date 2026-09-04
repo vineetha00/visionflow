@@ -30,21 +30,15 @@
 
 set -euo pipefail
 
-export HF_HOME="${HF_HOME:-/scratch1/$USER/hf}"
-export TOKENIZERS_PARALLELISM=false
-export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-8}"
-
-: "${VISIONFLOW_MODULES:=gcc/12.3.0 cuda/12.4.1 conda}"
 : "${VISIONFLOW_N:=150}"
 
+cd "${SLURM_SUBMIT_DIR:-$HOME/visionflow}"
 mkdir -p logs benchmarks/results
+source scripts/carc_env.sh
+vf_env_report
 
-module purge
-module load ${VISIONFLOW_MODULES}
-source "${VISIONFLOW_VENV:-$HOME/visionflow/.venv}/bin/activate"
-
-nvidia-smi || { echo "no GPU visible" >&2; exit 1; }
-python -c "import torch; print('cuda:', torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+python -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)" \
+  || { echo "no GPU visible -- wrong partition or --gres?" >&2; exit 1; }
 
 # Dataset build needs the network, so it is NOT run under HF_HUB_OFFLINE. If
 # compute nodes are firewalled, run this one command on the login node first --
