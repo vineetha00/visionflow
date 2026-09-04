@@ -9,6 +9,8 @@
 #SBATCH --time=01:00:00
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=vineetha@usc.edu
 #
 # ONNX export + execution-provider benchmark only.
 #

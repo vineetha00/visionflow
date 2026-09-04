@@ -9,6 +9,8 @@
 #SBATCH --time=04:00:00
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=vineetha@usc.edu
 #
 # NOTE: `mkdir -p logs` before your first sbatch. Slurm opens these files before
 # the script body runs, so the mkdir further down cannot create the directory in

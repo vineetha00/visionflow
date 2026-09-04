@@ -9,6 +9,8 @@
 #SBATCH --time=06:00:00
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=vineetha@usc.edu
 #
 # Large-n accuracy sweep on real document/chart data.
 #
