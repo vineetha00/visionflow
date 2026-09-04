@@ -44,8 +44,15 @@ python -c "import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)" \
 # compute nodes are firewalled, run this one command on the login node first --
 # it is deterministic given --seed, so the job will find the same set already
 # built and skip straight to evaluation.
+# Test the manifest AND its images, not just the manifest. The labeled_set.json
+# files are committed while the images are gitignored, so on a fresh clone the
+# JSON is present and the PNGs are not -- checking only the JSON makes this skip
+# the build and then fail on missing image files deep into the allocation.
 for SOURCE in docvqa chartqa; do
-  if [ ! -f "benchmarks/datasets/${SOURCE}_${VISIONFLOW_N}/labeled_set.json" ]; then
+  MANIFEST="benchmarks/datasets/${SOURCE}_${VISIONFLOW_N}/labeled_set.json"
+  if python -c "import sys; from visionflow.datasets import is_built; sys.exit(0 if is_built('$MANIFEST') else 1)"; then
+    echo "=== ${SOURCE} (n=${VISIONFLOW_N}) already built ==="
+  else
     echo "=== building ${SOURCE} (n=${VISIONFLOW_N}) ==="
     vf dataset "$SOURCE" -n "$VISIONFLOW_N" --seed 0
   fi

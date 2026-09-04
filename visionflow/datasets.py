@@ -78,6 +78,33 @@ def _answers(row) -> list[str]:
     return []
 
 
+def is_built(path) -> bool:
+    """Is this labeled set usable, i.e. manifest AND images both present?
+
+    The manifest is committed to git while the images are gitignored (they run to
+    hundreds of MB), so on a fresh clone the JSON exists and the PNGs do not.
+    Checking only for the manifest -- as an earlier version of the CARC script
+    did -- makes a job skip the build and then fail on missing image files well
+    into its allocation.
+    """
+    path = Path(path)
+    if not path.exists():
+        return False
+    try:
+        data = json.loads(path.read_text())
+        samples = data.get("samples") or []
+    except Exception:
+        return False
+    if not samples:
+        return False
+    root = Path(__file__).parent.parent
+    for sample in (samples[0], samples[-1]):
+        image = Path(sample["image"])
+        if not (image if image.is_absolute() else root / image).exists():
+            return False
+    return True
+
+
 def build(
     source: str,
     n: int = 200,
@@ -89,7 +116,13 @@ def build(
         raise ValueError(f"unknown source {source!r}; choose from {sorted(SOURCES)}")
     spec = SOURCES[source]
 
-    from datasets import load_dataset
+    try:
+        from datasets import load_dataset
+    except ImportError as e:
+        raise SystemExit(
+            "vf dataset needs the HuggingFace datasets package:\n"
+            "    pip install 'visionflow-edge[data]'   (or: pip install datasets)"
+        ) from e
 
     out_dir = Path(out_dir or f"benchmarks/datasets/{source}_{n}")
     images_dir = out_dir / "images"

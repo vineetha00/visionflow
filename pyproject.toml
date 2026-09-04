@@ -45,6 +45,8 @@ eval = ["openai>=1.30", "matplotlib>=3.8", "psutil>=5.9"]
 # onnxscript is required by torch>=2.6's exporter, which reaches for it even on
 # the legacy torchscript path. Without it torch.onnx.export raises
 # ModuleNotFoundError and every provider row degrades to "graph not found".
+# `vf dataset` (DocVQA/ChartQA labeled-set builder) needs HuggingFace datasets.
+data = ["datasets>=2.14"]
 onnx = ["onnx>=1.16", "onnxruntime>=1.18", "onnxscript>=0.1"]
 onnx-gpu = ["onnx>=1.16", "onnxruntime-gpu>=1.18", "onnxscript>=0.1"]
 constrained = ["outlines>=0.1"]

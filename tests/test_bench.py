@@ -115,6 +115,32 @@ def test_accuracy_rates_are_none_before_any_samples():
     assert r.schema_validity_rate is None and r.exact_accuracy is None
 
 
+def test_is_built_requires_images_not_just_the_manifest(tmp_path):
+    """The manifest is committed and the images are gitignored, so a fresh clone
+    has the JSON and none of the PNGs. A check that trusted the manifest alone
+    let a cluster job skip the build and fail on missing files hours later."""
+    import json as _json
+
+    from visionflow.datasets import is_built
+
+    manifest = tmp_path / "labeled_set.json"
+    assert not is_built(manifest)                       # absent entirely
+
+    manifest.write_text(_json.dumps(
+        {"samples": [{"image": str(tmp_path / "images" / "a.png")}]}))
+    assert not is_built(manifest)                       # manifest, no images
+
+    (tmp_path / "images").mkdir()
+    (tmp_path / "images" / "a.png").write_bytes(b"x")
+    assert is_built(manifest)                           # both present
+
+    manifest.write_text("not json")
+    assert not is_built(manifest)                       # corrupt
+
+    manifest.write_text(_json.dumps({"samples": []}))
+    assert not is_built(manifest)                       # empty
+
+
 def test_wilson_ci_bounds_are_sane():
     from visionflow.accuracy import wilson_ci
 
