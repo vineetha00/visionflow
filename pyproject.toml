@@ -47,6 +47,14 @@ eval = ["openai>=1.30", "matplotlib>=3.8", "psutil>=5.9"]
 # ModuleNotFoundError and every provider row degrades to "graph not found".
 # `vf dataset` (DocVQA/ChartQA labeled-set builder) needs HuggingFace datasets.
 data = ["datasets>=2.14"]
+# TensorRT for ORT's TensorRT execution provider. The version is pinned, not
+# floated, because ONNX Runtime binds its TRT provider to one TensorRT minor:
+# ORT 1.22 -> TensorRT 10.9 (ORT's own compatibility table). At the time of
+# writing `pip install tensorrt-cu12` resolves to 11.4, which ORT 1.22 cannot
+# load -- and the failure is silent, because ORT then falls back to CPU while
+# still listing TensorrtExecutionProvider in get_available_providers().
+# Re-pin this alongside any onnxruntime-gpu upgrade.
+tensorrt = ["tensorrt-cu12==10.9.0.34"]
 onnx = ["onnx>=1.16", "onnxruntime>=1.18", "onnxscript>=0.1"]
 onnx-gpu = ["onnx>=1.16", "onnxruntime-gpu>=1.18", "onnxscript>=0.1"]
 constrained = ["outlines>=0.1"]

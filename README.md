@@ -347,7 +347,13 @@ ONNX export: ok — torchscript+static-position-ids, opset 17, 28.4s,
 
 **And look at the TensorRT row: 1330.91ms, within 0.2% of the CPU row's 1333.45ms.** That is not a coincidence, it *is* the CPU number. TensorRT's libraries were absent, so ORT silently fell back — while `get_available_providers()` had listed `TensorrtExecutionProvider` the entire time, because the provider shared object is present and only fails when a session is created. A harness that trusted the provider list would have published 1330.91ms as a TensorRT result: a plausible-looking number, 67× slower than the CUDA row sitting directly above it, and completely wrong. Reading `provider_used` back from the live session is what caught it, and the near-identical CPU timing is the proof that the flag is correct rather than over-cautious.
 
-To actually measure TensorRT, install its libraries first (`pip install tensorrt-cu12`) and re-run — `scripts/carc_onnx.slurm` picks them up automatically via `LD_LIBRARY_PATH`. Until then this row stays flagged rather than reported.
+To actually measure TensorRT, install its libraries first and re-run — `scripts/carc_onnx.slurm` picks them up automatically via `LD_LIBRARY_PATH`. Until then this row stays flagged rather than reported.
+
+```bash
+pip install "visionflow-edge[tensorrt]"
+```
+
+That extra pins `tensorrt-cu12==10.9.0.34` deliberately. ONNX Runtime binds its TensorRT provider to a single TensorRT minor version — ORT 1.22 requires exactly 10.9 — while an unpinned `pip install tensorrt-cu12` currently resolves to 11.x. Installing the wrong minor produces no error: ORT keeps listing `TensorrtExecutionProvider`, fails at session creation, and silently runs on CPU, which is precisely the failure the table above already caught once. Re-pin this whenever `onnxruntime-gpu` is upgraded.
 
 Getting CUDA working at all needed one non-obvious fix worth recording: CARC's `cuda` module does not put `libcublas`/`libcudnn` on the loader path, so the CUDA provider also failed to load and fell back to CPU. torch's `+cu126` wheel already bundles those libraries as `nvidia-*` pip packages; pointing `LD_LIBRARY_PATH` at them turned a silent CPU fallback into the 19.67ms row above. That is handled in [`scripts/carc_env.sh`](scripts/carc_env.sh).
 

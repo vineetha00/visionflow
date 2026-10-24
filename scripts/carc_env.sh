@@ -58,6 +58,9 @@ PY
 [ -n "$_vf_libs" ] && export LD_LIBRARY_PATH="${_vf_libs}:${LD_LIBRARY_PATH:-}"
 
 # TensorRT's own libnvinfer, from the tensorrt-cu12 wheel if it is installed.
+# Install it as `pip install 'visionflow-edge[tensorrt]'`, which pins 10.9.0.34
+# to match ORT 1.22. An unpinned `pip install tensorrt-cu12` currently resolves
+# to 11.x, which ORT 1.22 cannot load -- and says nothing, falling back to CPU.
 _vf_trt="$(python -c 'import os,tensorrt_libs; print(os.path.dirname(tensorrt_libs.__file__))' 2>/dev/null || true)"
 [ -n "$_vf_trt" ] && export LD_LIBRARY_PATH="${_vf_trt}:${LD_LIBRARY_PATH:-}"
 unset _vf_libs _vf_trt
