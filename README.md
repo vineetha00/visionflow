@@ -310,8 +310,8 @@ Reproduce: `python examples/constrained_extraction.py`
 |---|---|
 | ONNX export of the vision encoder | ✅ Verified on Apple M3 (5.04e-04 vs PyTorch) and on an L40S (4.04e-04) |
 | `CPUExecutionProvider` | ✅ Measured on both |
-| `CUDAExecutionProvider` | ✅ **Measured on an L40S — 19.67ms p50, 67.8× faster than CPU** |
-| `TensorrtExecutionProvider` | ⚠️ **Not measured** — TensorRT libraries absent; ORT fell back to CPU and the harness flagged the row rather than reporting it |
+| `CUDAExecutionProvider` | ✅ **Measured on an L40S — 19.33ms p50, 67.6× faster than CPU** |
+| `TensorrtExecutionProvider` | ✅ **Measured on an L40S — 11.90ms p50, 109.8× faster than CPU, 1.62× faster than the CUDA EP** |
 | `CoreMLExecutionProvider` | Available but excluded by default — see below |
 | Full-model export (decoder + KV cache) | Delegated to `optimum.exporters.onnx`; not exercised here |
 
@@ -334,28 +334,31 @@ One image patch (384×384) through the vision tower, 20 runs, 3 warmup. Note the
 ```
 ONNX export: ok — torchscript+static-position-ids, opset 17, 28.4s,
              input [1, 3, 384, 384] → output [1, 729, 1152],
-             max |ONNX − PyTorch| = 4.04e-04
+             max |ONNX − PyTorch| = 1.08e-03
 ```
 
 | Execution provider | Status | p50 (ms) | p95 (ms) | mean (ms) |
 |---|---|---|---|---|
-| TensorrtExecutionProvider | ⚠️ **ORT fell back to CPUExecutionProvider; this is NOT a TensorRT measurement** | 1330.91 | 1334.76 | 1328.15 |
-| CUDAExecutionProvider | ok | **19.67** | 20.02 | 19.74 |
-| CPUExecutionProvider | ok | 1333.45 | 1335.02 | 1333.33 |
+| TensorrtExecutionProvider | ok | **11.90** | 11.94 | 11.88 |
+| CUDAExecutionProvider | ok | 19.33 | 19.39 | 19.31 |
+| CPUExecutionProvider | ok | 1306.60 | 1307.78 | 1306.67 |
 
-**The CUDA execution provider runs the vision encoder 67.8× faster than CPU** — 19.67ms against 1333.45ms at p50, with a p95/p50 spread of under 2% on both, so the measurement is tight.
+**TensorRT runs the vision encoder 109.8× faster than CPU and 1.62× faster than the CUDA execution provider** — 11.90ms vs 19.33ms vs 1306.60ms at p50. The p95/p50 spread is under 0.4% on every row, so these are tight measurements rather than lucky ones. The TensorRT engine build costs ~10 minutes on first session creation and is excluded from the timings as a startup cost, the same way model load time is excluded in `vf bench`.
 
-**And look at the TensorRT row: 1330.91ms, within 0.2% of the CPU row's 1333.45ms.** That is not a coincidence, it *is* the CPU number. TensorRT's libraries were absent, so ORT silently fell back — while `get_available_providers()` had listed `TensorrtExecutionProvider` the entire time, because the provider shared object is present and only fails when a session is created. A harness that trusted the provider list would have published 1330.91ms as a TensorRT result: a plausible-looking number, 67× slower than the CUDA row sitting directly above it, and completely wrong. Reading `provider_used` back from the live session is what caught it, and the near-identical CPU timing is the proof that the flag is correct rather than over-cautious.
+**This row took three attempts to earn, and the first two were silent failures.** Worth recording, because the failure mode is the point:
 
-To actually measure TensorRT, install its libraries first and re-run — `scripts/carc_onnx.slurm` picks them up automatically via `LD_LIBRARY_PATH`. Until then this row stays flagged rather than reported.
+1. *Run one* reported TensorRT at **1330.91ms — within 0.2% of the CPU row's 1333.45ms**, because it *was* the CPU number. TensorRT's libraries were absent, ORT fell back, and `get_available_providers()` listed `TensorrtExecutionProvider` throughout: the provider object is present and only fails at session creation. A harness that trusted that list would have published a "TensorRT" figure 67× slower than the CUDA row directly above it.
+2. *Run two* failed the same way for a different reason — CARC's `cuda` module does not put `libcublas`/`libcudnn` on the loader path, so even the CUDA provider silently fell back. torch's `+cu126` wheel bundles those libraries as `nvidia-*` pip packages; pointing `LD_LIBRARY_PATH` at them is what produced the CUDA row. Handled in [`scripts/carc_env.sh`](scripts/carc_env.sh).
+3. *Run three* needed the right TensorRT **minor** version. ORT binds its TensorRT provider to exactly one: ORT 1.22 requires 10.9, while an unpinned `pip install tensorrt-cu12` resolves to 11.x — which, again, fails only at session creation and falls back to CPU without an error.
 
 ```bash
 pip install "visionflow-edge[tensorrt]"
 ```
 
-That extra pins `tensorrt-cu12==10.9.0.34` deliberately. ONNX Runtime binds its TensorRT provider to a single TensorRT minor version — ORT 1.22 requires exactly 10.9 — while an unpinned `pip install tensorrt-cu12` currently resolves to 11.x. Installing the wrong minor produces no error: ORT keeps listing `TensorrtExecutionProvider`, fails at session creation, and silently runs on CPU, which is precisely the failure the table above already caught once. Re-pin this whenever `onnxruntime-gpu` is upgraded.
+That extra pins `tensorrt-cu12==10.9.0.34` for this reason, with a note to re-pin whenever `onnxruntime-gpu` moves. Reading `provider_used` back from the live session is the only thing that distinguished all three failures from a working run — in every one of them, the advertised provider list looked correct.
 
-Getting CUDA working at all needed one non-obvious fix worth recording: CARC's `cuda` module does not put `libcublas`/`libcudnn` on the loader path, so the CUDA provider also failed to load and fell back to CPU. torch's `+cu126` wheel already bundles those libraries as `nvidia-*` pip packages; pointing `LD_LIBRARY_PATH` at them turned a silent CPU fallback into the 19.67ms row above. That is handled in [`scripts/carc_env.sh`](scripts/carc_env.sh).
+One honest note on the export tolerance: this run reports **1.08e-03** against PyTorch where an earlier run on the same hardware reported 4.04e-04. The verification input is `torch.randn`, so the figure varies with the draw. Both are loose for fp32 and neither is zero; the number to trust is the order of magnitude, not the digits.
+
 
 **Getting this to export at all took a real fix, worth naming.** SmolVLM's vision embeddings compute position ids by counting unmasked patches, bucketizing fractional coordinates, and scattering through a boolean mask. Both ONNX exporters trace that into a `GatherND` whose indices are valid only for the traced batch — the graph exports without complaint, loads without complaint, and then throws `invalid index found, index = 26` on the *very input it was exported with*. For a full, unpadded patch grid that whole computation reduces to `arange(num_patches)`, so the exporter specializes it away. The exported graph is therefore correct for full patch grids and wrong for padded ones — and rather than assume the substitution is safe, the harness compares the exported graph against the **unpatched** PyTorch module, which is where the 5.04e-04 comes from.
 
@@ -384,10 +387,10 @@ CUDA is hidden behind a compiler in CARC's Lmod hierarchy, so `module load cuda`
 
 Results land in `benchmarks/results/*_cuda.{json,md}`, written under separate filenames so a GPU run never overwrites the Apple Silicon numbers above.
 
-The TensorRT path is written against the ORT provider API, not from measured experience, and it is labelled that way here rather than presented as a result. ORT falls back silently — requesting `TensorrtExecutionProvider` on a machine without it yields a working CPU session and no error — so the harness records the provider the live session *actually* used and flags any fallback, which means a CPU number can't be mistaken for a TensorRT one. To earn those rows, run this on a CUDA machine:
+ORT falls back silently — requesting `TensorrtExecutionProvider` on a machine that can't load it yields a working CPU session and no error — so the harness records the provider the live session *actually* used and flags any fallback. That check caught two separate silent failures before the TensorRT numbers above were earned. To reproduce on a CUDA machine:
 
 ```bash
-pip install "visionflow[onnx-gpu]" && python -m visionflow.onnx_export --verify --benchmark
+pip install "visionflow-edge[onnx-gpu,tensorrt]" && python -m visionflow.onnx_export --verify --benchmark
 ```
 
 Only the vision encoder is exported by default: it's a single fixed-shape forward pass that exports cleanly, and it's the component most sensitive to execution provider. The autoregressive decoder needs separate prefill/decode graphs with KV-cache tensors as graph I/O — a considerably larger job, left to `optimum`.
@@ -398,7 +401,7 @@ Only the vision encoder is exported by default: it's a single fixed-shape forwar
 2. **Correctness moved from prompting into the inference stack** — grammar-constrained decoding makes invalid JSON unrepresentable, with the repair loop demoted to a fallback for schema semantics. On 150 real DocVQA documents this is the difference between 2% and 79% usable output, and it is *faster*.
 3. **Capability tiers per device** — model size is part of hardware auto-detection, so the same code path serves an M3 and a Pi without the user choosing a checkpoint.
 4. **Accuracy reported against quantization level, not in isolation** — schema validity and field accuracy per configuration, so the speed/accuracy trade-off is visible instead of asserted. This is what surfaced the fp16 accuracy cliff above, which a latency-only benchmark would have reported as a straight 3.7× win.
-5. **Honest about what wasn't run** — the CUDA, TensorRT, and GGUF paths are implemented and unmeasured, and they say so in every table rather than being quietly omitted.
+5. **Honest about what wasn't run** — the GGUF path is implemented and explicitly unmeasured, and says so in its table rather than being quietly omitted. The TensorRT row carried a "this is NOT a TensorRT measurement" flag through two failed attempts before it was earned, rather than publishing the CPU latency ORT had silently substituted.
 
 ## Repo structure
 
@@ -430,7 +433,7 @@ Listed here rather than discovered later:
 
 - **The fp16-on-MPS accuracy drop is measured but not explained**, and the L40S run makes it stranger rather than clearer: 4-bit NF4 on CUDA beats 16-bit float on MPS by 7× on exact accuracy. That rules out "fp16 is simply lossy" as a sufficient explanation and points at MPS backend numerics, but two variables move at once and it is not proven. Needs a per-layer activation comparison between the MPS and CUDA vision towers. Not fixed here.
 - **The headline tables above are still computed on the 21-field hand-built set, and most of their comparisons don't clear their confidence intervals.** Only fp32-vs-fp16-on-MPS does. `vf dataset` now builds DocVQA/ChartQA sets at arbitrary n and the harness reports Wilson intervals, so the tooling gap is closed — but the large-n sweep that would upgrade those directional claims into measurements has only been run on the 256M model so far. The 2.25B INT4/INT8/fp32 comparison at n≥150 is the outstanding work, and [`scripts/carc_accuracy_large.slurm`](scripts/carc_accuracy_large.slurm) runs it.
-- **No TensorRT numbers.** The CUDA execution provider is measured (19.67ms p50 on an L40S), but TensorRT's libraries were absent, so ORT fell back to CPU. The harness flagged that row instead of reporting it. `pip install tensorrt-cu12` and a re-run of `scripts/carc_onnx.slurm` should close this; it is a packaging gap, not a hardware one.
+- **The ONNX/TensorRT numbers cover the vision encoder only, not end-to-end generation.** The autoregressive decoder — where most inference time actually goes — is still PyTorch. Exporting it needs separate prefill/decode graphs with KV-cache tensors as graph I/O, and is the obvious next piece of work. A 109.8× speedup on the encoder is not a 109.8× speedup on the pipeline.
 - **The 500M tier and the 256M-on-CUDA combination remain unbenchmarked.**
 - **The labeled set is 3 images.** Enough to compare configurations, not enough to state an absolute accuracy figure.
 - **No GPT-4o Vision baseline was run.** `eval.py` implements the comparison; it requires `OPENAI_API_KEY` and reports `ran: false` with a reason when the key is absent, rather than fabricating a score.
