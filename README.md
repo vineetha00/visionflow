@@ -504,6 +504,28 @@ One honest note on the export tolerance: this run reports **1.08e-03** against P
 
 CoreML is excluded from the default provider list: it compiles at session-creation time and supports only 768 of this graph's 1607 nodes, so it spends minutes partitioning and then runs a hybrid CoreML/CPU graph whose latency answers a different question. Opt in with `--providers CoreMLExecutionProvider`.
 
+### GPU run on Modal (no queue)
+
+[`scripts/modal_run.py`](scripts/modal_run.py) runs every harness on a serverless L40S — the same GPU as the existing numbers, so results stay comparable. One-time setup needs a Modal account with a card on file (the free tier includes $30/month of compute; the full accuracy sweep costs roughly $2–3):
+
+```bash
+pip install modal && modal setup
+```
+
+```bash
+modal run scripts/modal_run.py --task accuracy
+```
+
+```bash
+modal run scripts/modal_run.py --task all
+```
+
+```bash
+modal volume get visionflow-results / ./modal_results
+```
+
+The first run builds the image (~10 minutes; flash-attn is a separate, slower layer that only affects its own row if it fails) and downloads weights into a persistent Volume once. The CUDA stack is pinned to the combination that finally worked on CARC — cu126 torch, ONNX Runtime 1.22, TensorRT 10.9 — because the free-floating alternative silently falls back to CPU.
+
 ### GPU run on CARC (or any Slurm cluster)
 
 [`scripts/carc_gpu_benchmark.slurm`](scripts/carc_gpu_benchmark.slurm) runs all three harnesses on one GPU node. One-time setup on the **login** node — model weights must be cached there, since compute nodes may have no outbound internet:
