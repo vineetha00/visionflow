@@ -39,6 +39,19 @@ Text:
 
 Return ONLY the corrected, valid JSON object. No prose, no markdown fences."""
 
+# A separate template for schema failures. The JSON parsed fine here, so telling
+# the model it is malformed would be wrong and would send it looking for a syntax
+# error that does not exist. What it needs is the list of offending fields.
+SCHEMA_REPAIR_INSTRUCTIONS = """The following JSON parsed correctly but does not match the
+requested schema: {error}
+
+JSON:
+{broken}
+
+Fix only the fields named above. Keep every other field exactly as it is. Use null for a
+field whose value is genuinely not present in the image — do not invent one. Return ONLY
+the corrected JSON object, with no prose and no markdown fences."""
+
 
 @dataclass
 class ExtractionResult:
@@ -56,6 +69,13 @@ class ExtractionResult:
     new_tokens: int = 0        # tokens from the first generation
     repair_tokens: int = 0     # tokens spent on repair passes
     forward_passes: int = 1    # 1, or 1 + number of repair attempts made
+    # Schema validation (pydantic). `schema_valid` is None when no schema was
+    # given, so "not checked" stays distinguishable from "checked and failed".
+    validated: Any = None
+    schema_valid: Optional[bool] = None
+    validation_errors: list = field(default_factory=list)
+    # Schema-structural speculation, when it ran. See speculative.py.
+    speculation: Optional[dict] = None
 
     @property
     def total_tokens(self) -> int:
@@ -117,50 +137,88 @@ def extract_json(
     raw_output: str,
     generate_fn: Optional[GenerateFn] = None,
     max_repair_attempts: int = 1,
+    validator: Optional[Callable[[Any], Any]] = None,
 ) -> ExtractionResult:
-    """Parse `raw_output` as JSON, attempting cleanup and (optionally) a model-assisted
-    repair pass if parsing fails.
+    """Parse `raw_output` as JSON, with optional schema validation and a
+    model-assisted repair pass.
 
-    `generate_fn` is a callable that takes a repair prompt string and returns the
-    model's text response — pass `None` to disable the repair pass (parse-only mode,
-    used in tests).
+    `generate_fn` takes a repair prompt and returns the model's response — pass
+    `None` to disable repair (parse-only, used in tests).
+
+    `validator` takes the parsed object and returns a `ValidationOutcome`. It
+    turns the repair loop from a syntax fixer into a schema fixer: without it,
+    the best a repair prompt can say is what the JSON parser said ("Expecting
+    ',' delimiter: line 1 column 92"), which tells the model nothing about the
+    extraction task. With it, the prompt names the offending fields.
     """
     candidate = _strip_code_fences(raw_output)
-    try:
-        parsed = json.loads(candidate)
-        return ExtractionResult(mode="json", raw_output=raw_output, parsed=parsed, ok=True)
-    except json.JSONDecodeError:
-        pass
+    parsed, last_error = None, None
 
-    extracted = _extract_first_json_object(candidate)
-    if extracted:
+    for text in (candidate, _extract_first_json_object(candidate)):
+        if not text:
+            continue
         try:
-            parsed = json.loads(extracted)
-            return ExtractionResult(mode="json", raw_output=raw_output, parsed=parsed, ok=True)
+            parsed = json.loads(text)
+            break
         except json.JSONDecodeError as e:
             last_error = str(e)
-    else:
+    if parsed is None and last_error is None:
         last_error = "no JSON object found in output"
+
+    def _finish(obj, repaired: bool) -> Optional[ExtractionResult]:
+        """Validate `obj`; return a result if it is acceptable, else None."""
+        if validator is None:
+            return ExtractionResult(mode="json", raw_output=raw_output, parsed=obj,
+                                    ok=True, repaired=repaired)
+        outcome = validator(obj)
+        if outcome.ok:
+            return ExtractionResult(
+                mode="json", raw_output=raw_output, parsed=obj, ok=True, repaired=repaired,
+                validated=outcome.validated, schema_valid=True,
+            )
+        return None
+
+    if parsed is not None:
+        done = _finish(parsed, repaired=False)
+        if done is not None:
+            return done
+        outcome = validator(parsed)
+        last_error = outcome.summary
+        schema_failure = True
+    else:
+        schema_failure = False
 
     if generate_fn is None or max_repair_attempts < 1:
         return ExtractionResult(
-            mode="json", raw_output=raw_output, ok=False, error=last_error
+            mode="json", raw_output=raw_output, parsed=parsed,
+            ok=parsed is not None and validator is None,
+            error=last_error,
+            validation_errors=(validator(parsed).errors if validator and parsed is not None else []),
+            schema_valid=False if validator is not None else None,
         )
 
-    broken = extracted or candidate
+    broken = json.dumps(parsed) if parsed is not None else (
+        _extract_first_json_object(candidate) or candidate
+    )
     for _ in range(max_repair_attempts):
-        repair_prompt = REPAIR_INSTRUCTIONS.format(error=last_error, broken=broken)
-        repaired_text = generate_fn(repair_prompt)
+        template = SCHEMA_REPAIR_INSTRUCTIONS if schema_failure else REPAIR_INSTRUCTIONS
+        repaired_text = generate_fn(template.format(error=last_error, broken=broken))
         repaired_clean = _strip_code_fences(repaired_text)
         try:
-            parsed = json.loads(repaired_clean)
-            return ExtractionResult(
-                mode="json", raw_output=raw_output, parsed=parsed, ok=True, repaired=True
-            )
+            candidate_obj = json.loads(repaired_clean)
         except json.JSONDecodeError as e:
-            last_error = str(e)
-            broken = repaired_clean
+            last_error, broken, schema_failure = str(e), repaired_clean, False
+            continue
+        done = _finish(candidate_obj, repaired=True)
+        if done is not None:
+            return done
+        outcome = validator(candidate_obj)
+        last_error, broken, schema_failure = outcome.summary, repaired_clean, True
+        parsed = candidate_obj
 
     return ExtractionResult(
-        mode="json", raw_output=raw_output, ok=False, error=last_error, repaired=True
+        mode="json", raw_output=raw_output, parsed=parsed, ok=False, error=last_error,
+        repaired=True,
+        validation_errors=(validator(parsed).errors if validator and parsed is not None else []),
+        schema_valid=False if validator is not None else None,
     )

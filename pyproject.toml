@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 # returns 404 for such names, which makes it useless as an availability check;
 # pypi.org/simple/<name>/ is the endpoint that tells the truth.
 name = "visionflow-edge"
-version = "0.2.0"
+version = "0.3.0"
 description = "Edge-first, quantized Vision-Language Model pipeline for local medical and document intelligence"
 readme = "README.md"
 license = { text = "MIT" }
@@ -36,10 +36,18 @@ dependencies = [
   "pillow>=10.0",
   "numpy>=1.24",
   "psutil>=5.9",
+  # Core, not optional: pipeline.json validates against the schema by default,
+  # which is what makes constrained decoding's syntactic guarantee into a
+  # usable-object guarantee.
+  "pydantic>=2.0",
 ]
 
 [project.optional-dependencies]
 cuda = ["bitsandbytes>=0.43"]
+# FlashAttention-2. CUDA-only: the package builds against CUDA and has no Metal
+# equivalent, so on Apple Silicon the engine selects PyTorch SDPA instead and
+# records which kernel actually loaded. Needs a CUDA toolchain to build.
+flash = ["flash-attn>=2.5"]
 cpu = ["llama-cpp-python>=0.2.90"]
 eval = ["openai>=1.30", "matplotlib>=3.8", "psutil>=5.9"]
 # onnxscript is required by torch>=2.6's exporter, which reaches for it even on

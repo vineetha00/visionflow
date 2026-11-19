@@ -106,12 +106,40 @@ def select_model(hardware: Optional[HardwareTier] = None) -> str:
     return MODEL_TIERS[select_model_size(hardware)]
 
 
+def select_attn_implementation(hardware: Optional[HardwareTier] = None) -> str:
+    """Pick the best attention kernel available for this device.
+
+    FlashAttention-2 is CUDA-only — the `flash_attn` package builds against CUDA
+    and does not exist for Metal — so on Apple Silicon the honest best is PyTorch
+    SDPA, which dispatches to its own fused kernels. Asking for
+    `flash_attention_2` where it is unavailable raises at load time rather than
+    degrading, so this resolves it up front instead.
+
+    Returns one of "flash_attention_2", "sdpa", or "eager".
+    """
+    hardware = hardware or detect_hardware()
+    if hardware == HardwareTier.CUDA:
+        try:
+            import flash_attn  # noqa: F401
+
+            return "flash_attention_2"
+        except Exception:
+            return "sdpa"
+    # MPS and CPU: SDPA is supported and is the fused path on both.
+    return "sdpa"
+
+
 @dataclass
 class LoadStats:
     hardware: HardwareTier
     quantization: str
     load_seconds: float
     peak_memory_mb: Optional[float] = None
+    # Which attention kernel the model actually loaded with. Recorded rather than
+    # assumed, for the same reason the ONNX harness reads `provider_used` back
+    # from a live session: requesting FlashAttention and silently getting eager
+    # attention would make a latency number mean something other than its label.
+    attn_implementation: Optional[str] = None
 
 
 @dataclass
@@ -145,8 +173,12 @@ class ModelEngine:
         hardware: Optional[HardwareTier] = None,
         force_cpu: bool = False,
         quant_mode: Optional[str] = None,
+        attn_implementation: Optional[str] = None,
     ):
         self.hardware = HardwareTier.CPU if force_cpu else (hardware or detect_hardware())
+        # None auto-selects: FlashAttention-2 on CUDA when installed, else SDPA.
+        self.attn_implementation = attn_implementation or select_attn_implementation(self.hardware)
+        self.attn_implementation_used: Optional[str] = None
         # quant_mode pins the quantization instead of taking the tier's default.
         # The benchmark harness needs this: without it, asking for INT8 on CUDA
         # would silently measure INT4, since _load_cuda tries 4-bit first.
@@ -176,23 +208,50 @@ class ModelEngine:
             hardware=self.hardware,
             quantization=quantization,
             load_seconds=elapsed,
+            attn_implementation=self.attn_implementation_used,
         )
         return self.load_stats
+
+    def _attn_kwargs(self) -> dict:
+        return {"attn_implementation": self.attn_implementation} if self.attn_implementation else {}
+
+    def _from_pretrained(self, **kwargs):
+        """Load the model, falling back if the requested attention kernel is
+        unavailable — and recording which one actually took effect.
+
+        A silent downgrade here would be the attention-kernel version of ORT's
+        silent CPU fallback: the run still works, the number still looks fine,
+        and it no longer means what its label says.
+        """
+        requested = self.attn_implementation
+        try:
+            model = AutoModelForVLM.from_pretrained(**kwargs, **self._attn_kwargs())
+            self.attn_implementation_used = requested
+            return model
+        except Exception:
+            if not requested or requested == "eager":
+                raise
+            fallback = "sdpa" if requested != "sdpa" else "eager"
+            model = AutoModelForVLM.from_pretrained(**kwargs, attn_implementation=fallback)
+            self.attn_implementation_used = f"{fallback} (requested {requested})"
+            return model
 
     def _load_cuda(self) -> str:
         from .quantize import bnb_config
 
         def _load(mode: str) -> None:
-            self.model = AutoModelForVLM.from_pretrained(
-                self.model_id, quantization_config=bnb_config(mode), device_map="auto"
+            self.model = self._from_pretrained(
+                pretrained_model_name_or_path=self.model_id,
+                quantization_config=bnb_config(mode), device_map="auto",
             )
 
         if self.quant_mode == "int8":
             _load("int8")
             return "int8-bnb"
         if self.quant_mode == "fp16":
-            self.model = AutoModelForVLM.from_pretrained(
-                self.model_id, torch_dtype=torch.float16, device_map="auto"
+            self.model = self._from_pretrained(
+                pretrained_model_name_or_path=self.model_id,
+                torch_dtype=torch.float16, device_map="auto",
             )
             return "fp16-cuda"
 
@@ -207,14 +266,14 @@ class ModelEngine:
             return "int8-bnb-fallback"
 
     def _load_mps(self) -> str:
-        self.model = AutoModelForVLM.from_pretrained(
-            self.model_id, torch_dtype=torch.float16
+        self.model = self._from_pretrained(
+            pretrained_model_name_or_path=self.model_id, torch_dtype=torch.float16,
         ).to("mps")
         return "fp16-mps"
 
     def _load_cpu(self) -> str:
-        self.model = AutoModelForVLM.from_pretrained(
-            self.model_id, torch_dtype=torch.float32
+        self.model = self._from_pretrained(
+            pretrained_model_name_or_path=self.model_id, torch_dtype=torch.float32,
         )
         return "fp32-cpu"
 

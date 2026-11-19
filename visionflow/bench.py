@@ -67,6 +67,7 @@ class BenchResult:
     backend: str
     model_id: str
     quantization: Optional[str] = None
+    attn: Optional[str] = None
     skipped: bool = False
     reason: Optional[str] = None
 
@@ -206,6 +207,7 @@ def _run_worker(config: BenchConfig, images: list[str], prompt: str, repeats: in
 
     result.load_seconds = load_stats.load_seconds
     result.quantization = load_stats.quantization
+    result.attn = load_stats.attn_implementation
 
     loaded = [Image.open(p).convert("RGB") for p in images]
 
@@ -352,14 +354,14 @@ def to_markdown(report: dict) -> str:
     host = report.get("host", {})
     meth = report.get("methodology", {})
     lines = [
-        "| Configuration | Model | Quant | Load (s) | p50 (s) | p95 (s) | mean ± std (s) | tok/s | Peak RSS (MB) | Device mem (MB) |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| Configuration | Model | Quant | Attn | Load (s) | p50 (s) | p95 (s) | mean ± std (s) | tok/s | Peak RSS (MB) | Device mem (MB) |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in report.get("results", []):
         model_short = r["model_id"].split("/")[-1]
         if r.get("skipped"):
             lines.append(
-                f"| {r['label']} | {model_short} | — | — | — | — | "
+                f"| {r['label']} | {model_short} | — | — | — | — | — | "
                 f"*not measured — {r.get('reason', 'unavailable')}* | — | — | — |"
             )
             continue
@@ -367,6 +369,7 @@ def to_markdown(report: dict) -> str:
         f0 = lambda v: f"{v:,.0f}" if isinstance(v, (int, float)) else "—"
         lines.append(
             f"| {r['label']} | {model_short} | {r.get('quantization') or '—'} | "
+            f"{r.get('attn') or '—'} | "
             f"{f2(r.get('load_seconds'))} | {f2(r.get('p50_s'))} | {f2(r.get('p95_s'))} | "
             f"{f2(r.get('mean_s'))} ± {f2(r.get('std_s'))} | "
             f"{f2(r.get('tokens_per_second'))} | {f0(r.get('peak_rss_mb'))} | "

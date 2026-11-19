@@ -285,7 +285,80 @@ Three paths, in preference order:
 
 **Honest limitation of path 2**: validating all ~49k vocabulary entries per step is too slow in Python, so the built-in processor validates only the top-`k` candidates by logit (default 256) and masks the rest. It still guarantees valid JSON, but it restricts sampling to that window. Under greedy/low-temperature decoding — the default for extraction — the constrained argmax equals the unconstrained argmax whenever the latter is grammar-valid, so in practice this only changes output where the raw model would have emitted invalid JSON. Paths 1 and 3 have no such approximation.
 
-This guarantees **syntactic** validity only. Whether the values are *correct*, and whether they satisfy the schema's semantics, is still the caller's problem — so `constrained=True` keeps the repair pass as a fallback for schema-level failures.
+This guarantees **syntactic** validity only — which is why the next section exists.
+
+## Schema validation (pydantic)
+
+Constrained decoding guarantees the output *parses*. It says nothing about whether every requested field came back, whether `qty` is a number rather than the word "forty-eight", or whether `flagged_anomalies` is a list. `vf.json(...)` validates the parsed object against the schema with pydantic by default:
+
+```python
+vf.json("report.png", "Extract the patient data", schema={"mrn": "string", "qty": "integer"})
+```
+
+```python
+from pydantic import BaseModel
+
+class Report(BaseModel):
+    mrn: str
+    qty: int
+
+vf.json("report.png", "Extract the patient data", schema=Report)   # a model works too
+```
+
+The result carries `schema_valid`, `validated` (the coerced object) and `validation_errors`. `schema_valid` is `None` when no schema was supplied, so "not checked" stays distinguishable from "checked and failed".
+
+Two deliberate choices:
+
+**Fields are required but nullable.** The prompt tells the model to emit `null` for anything absent from the image rather than dropping the key, and the accuracy harness counts an object as schema-valid only when every key is present. So an explicit `null` passes and a missing key fails — they are different outcomes and the repair loop should see the difference.
+
+**Coercion is lenient by default.** A VLM reading a scanned document returns `"48"` far more often than `48`; rejecting that would make validation an obstacle rather than a safety net. `strict=True` turns coercion off, which is itself a useful signal — it shows where the model is guessing at types rather than reading them.
+
+The practical payoff is a better repair prompt. Without validation the loop can only repeat what the JSON parser said:
+
+```
+failed to parse with error: Expecting ',' delimiter: line 1 column 92
+```
+
+With it, the prompt names the field and the problem, and uses a template that doesn't send the model hunting for a syntax error that isn't there:
+
+```
+The following JSON parsed correctly but does not match the requested schema:
+qty: Input should be a valid integer, unable to parse string as an integer
+```
+
+**What validation cannot catch:** types, not plausibility. Running the 256M model against a manifest returned `{"manifest_no": "string", "ship_date": "string", ...}` — it copied the schema's own type hints as values. Every field present, every type correct, `schema_valid: True`, and the content worthless. Validation is a floor, not a measure of correctness; that is what `vf accuracy` is for.
+
+## Speculative decoding for JSON
+
+With a pinned schema, most of the output isn't a prediction. For `{"mrn": "string", "qty": "integer"}` the model only chooses two values — `{"mrn": "`, then `", "qty": `, then `}` are forced. A plain decode loop spends a forward pass on every one of those tokens.
+
+```python
+vf.json("manifest.png", "Extract the header", schema=SCHEMA, speculative=True)
+```
+
+The forced runs are emitted directly and the next forward pass absorbs each run whole, which is what speculative decoding's verification step does — except there is nothing to verify. The acceptance rate is 100% by construction because the grammar permits no alternative, there is no draft model in memory, and there is no rejection path to get wrong.
+
+Measured on a 3-field manifest extraction with SmolVLM-256M: **27 tokens generated in 13 forward passes instead of 28**, with output byte-identical to the unspeculated run. `result.speculation` reports `forced_runs`, `forced_tokens`, `free_tokens`, `forward_passes` and `tokens_saved` per call, because the saving depends entirely on schema shape — a record of short identifiers is mostly skeleton, one field holding a paragraph of findings is mostly value.
+
+`tokens_saved` counts passes avoided (`forced_tokens − forced_runs`), not tokens emitted: a forced run of k tokens costs one pass, so it saves k−1.
+
+**Field types matter here, and finding that out was the useful part.** An early version forced only keys and punctuation, and a live run produced `{"manifest_no": 2026-` before bailing — the model had read the date correctly but emitted it unquoted, which is neither valid JSON nor on the skeleton. Forcing the opening quote of a *string* field makes that failure unrepresentable. Numeric fields deliberately get no quote.
+
+**Honest caveat on tokenization.** Forced text is tokenized on its own and spliced in, so token boundaries can differ from what the model would produce for the same characters in context. The decoded string is identical and the schema pins what follows, but the KV cache then holds a slightly unusual segmentation, which could nudge the distribution over subsequent *value* tokens. On the run above the output was identical either way; that is one case, not a proof, and the speculative/non-speculative comparison is the way to check it rather than assume it.
+
+When the output leaves the skeleton anyway, speculation stops and records `diverged: true` rather than forcing a shape the model has already contradicted.
+
+## Attention kernels
+
+The engine selects an attention implementation per device and **records which one actually loaded**:
+
+| Device | Selected | Note |
+|---|---|---|
+| NVIDIA + `flash-attn` installed | `flash_attention_2` | `pip install "visionflow-edge[flash]"`; needs a CUDA toolchain to build |
+| NVIDIA without it | `sdpa` | PyTorch's fused kernels |
+| Apple Silicon / CPU | `sdpa` | FlashAttention is CUDA-only — the package has no Metal build |
+
+Override with `VisionFlow(attn_implementation="eager")`. If a requested kernel fails to load the engine falls back and records it as `sdpa (requested flash_attention_2)` rather than reporting the fallback under the original name — the same rule the ONNX harness applies to execution providers, for the same reason: a silent downgrade leaves a latency number meaning something other than its label. The `Attn` column in `vf bench` shows what each row ran with.
 
 ### What it actually changes
 
@@ -412,6 +485,8 @@ visionflow/
 │   ├── pipeline.py       # VisionFlow main class — image + prompt → output
 │   ├── extractors.py     # Structured extraction: JSON, key-value, repair pass
 │   ├── constrained.py    # Grammar-constrained JSON decoding (+ GBNF, outlines)
+│   ├── validation.py     # pydantic schema validation + schema-aware repair
+│   ├── speculative.py    # Schema-structural speculative decoding
 │   ├── bench.py          # `vf bench` — latency / throughput / memory harness
 │   ├── accuracy.py       # `vf accuracy` — accuracy per quantization level
 │   ├── onnx_export.py    # ONNX export + execution-provider benchmarking
