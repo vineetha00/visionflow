@@ -285,6 +285,21 @@ Three paths, in preference order:
 
 **Honest limitation of path 2**: validating all ~49k vocabulary entries per step is too slow in Python, so the built-in processor validates only the top-`k` candidates by logit (default 256) and masks the rest. It still guarantees valid JSON, but it restricts sampling to that window. Under greedy/low-temperature decoding — the default for extraction — the constrained argmax equals the unconstrained argmax whenever the latter is grammar-valid, so in practice this only changes output where the raw model would have emitted invalid JSON. Paths 1 and 3 have no such approximation.
 
+### What it actually changes
+
+Same image, same schema, same greedy decode, SmolVLM-256M on MPS:
+
+| | Raw model output | Parsed result | Repair pass needed | Time |
+|---|---|---|---|---|
+| Repair loop (v1) | `Synthetic Quarterly Revenue ($M) - Sample Dashboard` — prose, not JSON | `{"title": …, "subtitle": …, "x-axis": …, "y-axis": …}` | **yes** | 3.9s |
+| Constrained | `{ "title": …, "q1_revenue": …, "q2_revenue": …, "q3_revenue": … }` | same, parsed directly | no | 3.5s |
+
+Three things to notice. The unconstrained model didn't emit *slightly malformed* JSON — it emitted no JSON at all, and only the repair pass rescued it. That repair invented `subtitle`, `x-axis`, and `y-axis`, none of which are in the requested schema, because it was re-prompted on prose rather than on a partial object. And constraining was **faster**, because skipping a second full forward pass more than pays for the per-step masking (4,237 tokens masked across 68 steps, zero fallbacks).
+
+Both runs still get the *values* wrong — a 256M model misreads the bar values. Constrained decoding buys you syntax and schema conformance, not accuracy. The accuracy tables above are where that gets measured.
+
+Reproduce: `python examples/constrained_extraction.py`
+
 This guarantees **syntactic** validity only — which is why the next section exists.
 
 ## Schema validation (pydantic)
@@ -328,6 +343,28 @@ qty: Input should be a valid integer, unable to parse string as an integer
 
 **What validation cannot catch:** types, not plausibility. Running the 256M model against a manifest returned `{"manifest_no": "string", "ship_date": "string", ...}` — it copied the schema's own type hints as values. Every field present, every type correct, `schema_valid: True`, and the content worthless. Validation is a floor, not a measure of correctness; that is what `vf accuracy` is for.
 
+### Measured: it did not improve any number
+
+This is the negative result in v0.3.0, and it is reported with the same prominence as the positive ones. Same 30 DocVQA documents, SmolVLM-256M on MPS, validation on vs off:
+
+| Configuration | Schema-valid | Exact | Fuzzy | Repairs | s/sample |
+|---|---|---|---|---|---|
+| Unconstrained, validation **off** | 0/30 | 0/30 | 0/30 | 23 | **13.2** |
+| Unconstrained, validation **on** | 0/30 | 0/30 | 0/30 | 30 | 22.4 |
+| Constrained, validation **off** | 26/30 | 9/30 | 12/30 | 2 | **7.3** |
+| Constrained, validation **on** | 26/30 | 9/30 | 12/30 | 4 | 8.9 |
+
+**Identical accuracy and validity in both pairs. Validation on cost 1.7× (unconstrained) and 1.22× (constrained) in latency.** Every repair it triggered — 7 extra in the first pair, 2 in the second — failed to rescue the sample. The better-worded repair prompt, which names the offending field instead of quoting a parser column, was not something this model could act on.
+
+What that does and does not mean:
+
+- The cost is not validation itself, which takes microseconds. It is the **repair pass that a validation failure triggers**. `max_repair_attempts=0` keeps the guarantee — a shape-checked, type-coerced object — at no measured cost.
+- The guarantee still has value for downstream code, which gets a typed object or an explicit failure rather than a dict of unknown shape. That is a correctness property, not an accuracy one, and this table measures accuracy.
+- The repair-prompt advantage remains **untested on a model that could use it**. A 256M model that cannot produce JSON on its own cannot fix a named field either. The 2.25B model needs only 1–2 repairs on the synthetic set; whether field-level error messages help *there* is the open question.
+- The single-field DocVQA schema (`{"answer": "string"}`) gives pydantic almost nothing to catch beyond the harness's own every-key-present check. A ten-field medical schema with integer and list fields is where type coercion and missing-key detection would do real work — and is unmeasured.
+
+Validation stays on by default for the guarantee, with the cost stated here rather than discovered later. Raw outcomes: [`benchmarks/results/v030_ablations/`](benchmarks/results/v030_ablations/).
+
 ## Speculative decoding for JSON
 
 With a pinned schema, most of the output isn't a prediction. For `{"mrn": "string", "qty": "integer"}` the model only chooses two values — `{"mrn": "`, then `", "qty": `, then `}` are forced. A plain decode loop spends a forward pass on every one of those tokens.
@@ -338,13 +375,27 @@ vf.json("manifest.png", "Extract the header", schema=SCHEMA, speculative=True)
 
 The forced runs are emitted directly and the next forward pass absorbs each run whole, which is what speculative decoding's verification step does — except there is nothing to verify. The acceptance rate is 100% by construction because the grammar permits no alternative, there is no draft model in memory, and there is no rejection path to get wrong.
 
-Measured on a 3-field manifest extraction with SmolVLM-256M: **27 tokens generated in 13 forward passes instead of 28**, with output byte-identical to the unspeculated run. `result.speculation` reports `forced_runs`, `forced_tokens`, `free_tokens`, `forward_passes` and `tokens_saved` per call, because the saving depends entirely on schema shape — a record of short identifiers is mostly skeleton, one field holding a paragraph of findings is mostly value.
+Mechanism check on a 3-field manifest with SmolVLM-256M: **27 tokens in 13 forward passes instead of 28**, output byte-identical to the unspeculated run. `result.speculation` reports `forced_runs`, `forced_tokens`, `free_tokens`, `forward_passes` and `tokens_saved` per call; `tokens_saved` counts passes avoided (`forced_tokens − forced_runs`), not tokens emitted, since a forced run of k tokens costs one pass and saves k−1.
 
-`tokens_saved` counts passes avoided (`forced_tokens − forced_runs`), not tokens emitted: a forced run of k tokens costs one pass, so it saves k−1.
+### Measured: what speculation actually buys
+
+30 DocVQA documents, SmolVLM-256M on Apple M3 (MPS fp16), `max_new_tokens=96`. Three configurations, because the first comparison alone is misleading:
+
+| Configuration | s/sample | Schema-valid | Exact | Fuzzy | Repairs | Tokens/sample |
+|---|---|---|---|---|---|---|
+| Baseline (no constraint) | 22.4 | 0/30 | 0/30 | 0/30 | 30 | 79 (11 + 68 repair) |
+| Constrained decoding | 8.9 | 26/30 | 9/30 | 12/30 | 4 | 40 |
+| **Speculative** | **6.8** | **30/30** | 10/30 | 13/30 | 1 | 18 |
+
+Against the baseline, speculation looks like a **3.3×** speedup. That number is not speculation's to claim. Look at the baseline's token column: 11 tokens of prose, a failed parse, then **68 tokens of repair that also fails** — on every one of 30 samples. Speculation forces `{"answer": "`, so the first pass parses and the repair never fires. That is *repair avoidance*, the same effect constrained decoding already delivers, and it accounts for **2.5×** of the 3.3×.
+
+**The honest headline is speculative vs constrained: 1.32× faster**, with equal or better accuracy (10 vs 9 exact, 13 vs 12 fuzzy) and better validity (30/30 vs 26/30, 1 repair vs 4). The skeleton forces the closing structure as well as the opening, where the top-k grammar can still let an object end early or with the wrong key.
+
+**One confound, stated because it is real.** Only ~3 structural tokens per sample were actually spliced, which is not enough to explain 1.32× on its own. The speculative path also has **no per-step Python logits processor** — constrained decoding validates up to 256 candidate tokens in Python at every step, and speculation skips that entirely. So 1.32× is "speculative path vs constrained path", from two sources this run does not separate. It is not "1.32× from skipped forward passes".
 
 **Field types matter here, and finding that out was the useful part.** An early version forced only keys and punctuation, and a live run produced `{"manifest_no": 2026-` before bailing — the model had read the date correctly but emitted it unquoted, which is neither valid JSON nor on the skeleton. Forcing the opening quote of a *string* field makes that failure unrepresentable. Numeric fields deliberately get no quote.
 
-**Honest caveat on tokenization.** Forced text is tokenized on its own and spliced in, so token boundaries can differ from what the model would produce for the same characters in context. The decoded string is identical and the schema pins what follows, but the KV cache then holds a slightly unusual segmentation, which could nudge the distribution over subsequent *value* tokens. On the run above the output was identical either way; that is one case, not a proof, and the speculative/non-speculative comparison is the way to check it rather than assume it.
+**The tokenization caveat now has evidence against it.** Forced text is tokenized on its own and spliced in, so token boundaries can differ from what the model would produce in context, and the KV cache holds a slightly unusual segmentation that could in principle nudge subsequent *value* tokens. The n=30 comparison above is the test: speculative value accuracy was not worse than constrained (10/30 vs 9/30 exact). One model, one dataset, n=30 — not a proof, but the concern no longer stands unexamined. Raw outcomes: [`benchmarks/results/v030_ablations/`](benchmarks/results/v030_ablations/).
 
 When the output leaves the skeleton anyway, speculation stops and records `diverged: true` rather than forcing a shape the model has already contradicted.
 
@@ -368,20 +419,28 @@ pip install packaging ninja && MAX_JOBS=4 pip install flash-attn --no-build-isol
 
 Override with `VisionFlow(attn_implementation="eager")`. If a requested kernel fails to load the engine falls back and records it as `sdpa (requested flash_attention_2)` rather than reporting the fallback under the original name — the same rule the ONNX harness applies to execution providers, for the same reason: a silent downgrade leaves a latency number meaning something other than its label. The `Attn` column in `vf bench` shows what each row ran with.
 
-### What it actually changes
+### Measured: SDPA vs eager
 
-Same image, same schema, same greedy decode, SmolVLM-256M on MPS:
+`vf bench --attn sdpa` against `--attn eager`, SmolVLM-256M, 3 images × 2 repeats, `max_new_tokens=128`, Apple M3:
 
-| | Raw model output | Parsed result | Repair pass needed | Time |
+| Backend | SDPA p50 | Eager p50 | Speedup | tok/s (SDPA / eager) |
 |---|---|---|---|---|
-| Repair loop (v1) | `Synthetic Quarterly Revenue ($M) - Sample Dashboard` — prose, not JSON | `{"title": …, "subtitle": …, "x-axis": …, "y-axis": …}` | **yes** | 3.9s |
-| Constrained | `{ "title": …, "q1_revenue": …, "q2_revenue": …, "q3_revenue": … }` | same, parsed directly | no | 3.5s |
+| Apple MPS / fp16 | 11.57 s | 15.82 s | **1.37×** | 8.47 / 6.49 |
+| CPU / fp32 | 16.56 s | 29.39 s | **1.77×** | 5.74 / 3.33 |
 
-Three things to notice. The unconstrained model didn't emit *slightly malformed* JSON — it emitted no JSON at all, and only the repair pass rescued it. That repair invented `subtitle`, `x-axis`, and `y-axis`, none of which are in the requested schema, because it was re-prompted on prose rather than on a partial object. And constraining was **faster**, because skipping a second full forward pass more than pays for the per-step masking (4,237 tokens masked across 68 steps, zero fallbacks).
+Selecting SDPA over eager is worth 1.37× on Apple Silicon and 1.77× on CPU, consistent in direction on both. n=6 per cell, so the direction is unambiguous and the magnitude approximate. **FlashAttention-2 itself remains unmeasured** — it is CUDA-only, and this table is the kernel axis on the hardware most users of this package actually have. The FlashAttention row needs a CUDA machine with `flash-attn` built; `scripts/carc_gpu_benchmark.slurm` will record it when one is available.
 
-Both runs still get the *values* wrong — a 256M model misreads the bar values. Constrained decoding buys you syntax and schema conformance, not accuracy. The next table is where accuracy gets measured.
+## What v0.3.0 measurably changed
 
-Reproduce: `python examples/constrained_extraction.py`
+Three features shipped in v0.3.0. Each was then measured against its own absence on the same 30 DocVQA documents (or the same bench set), SmolVLM-256M on an Apple M3. Two improved a number; one did not, and says so above.
+
+| Feature | Fair comparison | Result | Verdict |
+|---|---|---|---|
+| **Speculative decoding** | vs constrained decoding (both guarantee JSON) | **1.32× faster**, 30/30 vs 26/30 schema-valid, accuracy equal or better | Improved — with a stated confound (no per-step Python processor on the speculative path) |
+| **Attention kernel selection** | SDPA vs eager | **1.37× on MPS, 1.77× on CPU** | Improved |
+| **Pydantic validation** | on vs off, on top of constrained decoding | Identical accuracy and validity, **1.22× slower** | **Did not improve any number.** Keeps a correctness guarantee; its repair-prompt advantage is untested on a model that could use it |
+
+Two numbers that are *not* in this table on purpose: "3.3× from speculation" (2.5× of it is repair avoidance that constrained decoding already provides) and anything for FlashAttention-2 (CUDA-only, unmeasurable on this machine). Everything here is one model, one dataset, n=30 or n=6 — enough to settle direction, not magnitude. Raw outcomes for all five experiments: [`benchmarks/results/v030_ablations/`](benchmarks/results/v030_ablations/).
 
 ## ONNX Runtime and TensorRT
 

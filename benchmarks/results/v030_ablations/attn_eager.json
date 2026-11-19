@@ -1,0 +1,138 @@
+{
+  "methodology": {
+    "process_isolation": true,
+    "warmup_runs_excluded": 1,
+    "repeats_per_image": 2,
+    "n_images": 3,
+    "max_new_tokens": 128,
+    "prompt": "Describe the key information in this document or image.",
+    "images": [
+      "/Users/vineetha/Downloads/visionflow/examples/sample_images/chart_dashboard.png",
+      "/Users/vineetha/Downloads/visionflow/examples/sample_images/medical_report.png",
+      "/Users/vineetha/Downloads/visionflow/examples/sample_images/shipping_manifest.png"
+    ]
+  },
+  "host": {
+    "platform": "macOS-15.1-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python": "3.13.3",
+    "torch": "2.13.0",
+    "total_ram_gb": 16.0,
+    "cuda_available": false,
+    "mps_available": true
+  },
+  "results": [
+    {
+      "label": "CUDA / INT4 (bnb nf4)",
+      "backend": "cuda",
+      "model_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "quantization": null,
+      "attn": null,
+      "skipped": true,
+      "reason": "no CUDA device on this machine",
+      "load_seconds": null,
+      "n_measured": 0,
+      "latencies": [],
+      "tokens": [],
+      "mean_s": null,
+      "p50_s": null,
+      "p95_s": null,
+      "std_s": null,
+      "tokens_per_second": null,
+      "peak_rss_mb": null,
+      "device_peak_mb": null,
+      "device_memory_note": null
+    },
+    {
+      "label": "CUDA / INT8 (bnb)",
+      "backend": "cuda",
+      "model_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "quantization": null,
+      "attn": null,
+      "skipped": true,
+      "reason": "no CUDA device on this machine",
+      "load_seconds": null,
+      "n_measured": 0,
+      "latencies": [],
+      "tokens": [],
+      "mean_s": null,
+      "p50_s": null,
+      "p95_s": null,
+      "std_s": null,
+      "tokens_per_second": null,
+      "peak_rss_mb": null,
+      "device_peak_mb": null,
+      "device_memory_note": null
+    },
+    {
+      "label": "Apple MPS / fp16",
+      "backend": "mps",
+      "model_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "quantization": "fp16-mps",
+      "attn": "eager",
+      "skipped": false,
+      "reason": null,
+      "load_seconds": 4.788743019104004,
+      "n_measured": 6,
+      "latencies": [
+        17.329416749998927,
+        18.99343170801876,
+        10.750906874978682,
+        14.696912333980436,
+        16.94883837501402,
+        10.897780708997743
+      ],
+      "tokens": [
+        128,
+        128,
+        35,
+        128,
+        128,
+        35
+      ],
+      "mean_s": 14.936214458498094,
+      "p50_s": 15.822875354497228,
+      "p95_s": 18.577427968513803,
+      "std_s": 3.467624439634489,
+      "tokens_per_second": 6.494282756151173,
+      "peak_rss_mb": 440.640625,
+      "device_peak_mb": 6329.1875,
+      "device_memory_note": "torch.mps.driver_allocated_memory"
+    },
+    {
+      "label": "CPU / fp32",
+      "backend": "cpu",
+      "model_id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "quantization": "fp32-cpu",
+      "attn": "eager",
+      "skipped": false,
+      "reason": null,
+      "load_seconds": 3.748431921005249,
+      "n_measured": 6,
+      "latencies": [
+        21.567568750004284,
+        32.30801512498874,
+        26.885134790994925,
+        24.49811108299764,
+        37.577216625009896,
+        31.903763458976755
+      ],
+      "tokens": [
+        128,
+        128,
+        35,
+        128,
+        128,
+        35
+      ],
+      "mean_s": 29.123301638828707,
+      "p50_s": 29.39444912498584,
+      "p95_s": 36.25991625000461,
+      "std_s": 5.879335413455566,
+      "tokens_per_second": 3.3306663235831246,
+      "peak_rss_mb": 2798.234375,
+      "device_peak_mb": null,
+      "device_memory_note": null
+    }
+  ]
+}
