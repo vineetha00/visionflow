@@ -204,7 +204,7 @@ def load_labeled_set(path: Optional[str] = None, root: Optional[Path] = None) ->
 def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
                 samples: list[dict], root: str, max_new_tokens: int,
                 quant_mode: Optional[str] = None,
-                speculative: bool = False) -> AccuracyResult:
+                speculative: bool = False, validate: bool = True) -> AccuracyResult:
     """Evaluate one configuration in this process."""
     import time
 
@@ -244,7 +244,7 @@ def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
             extraction = vf.json(
                 image_path, prompt=sample["prompt"], schema=sample["schema"],
                 max_new_tokens=max_new_tokens, constrained=constrained,
-                speculative=speculative,
+                speculative=speculative, validate=validate,
             )
         except Exception as e:
             result.n_samples += 1
@@ -355,6 +355,7 @@ def run_accuracy(
     isolate: bool = True,
     include_constrained: bool = True,
     include_speculative: bool = False,
+    validate: bool = True,
     only: Optional[list[str]] = None,
     skip: Optional[list[str]] = None,
     limit: Optional[int] = None,
@@ -374,12 +375,13 @@ def run_accuracy(
             results.append(_run_worker(
                 config["backend"], config["model_id"], config["label"],
                 config["constrained"], samples, str(root), max_new_tokens,
-                config.get("quant_mode"), config.get("speculative", False),
+                config.get("quant_mode"), config.get("speculative", False), validate,
             ).to_dict())
             continue
 
         payload = json.dumps({
-            **config, "samples": samples, "root": str(root), "max_new_tokens": max_new_tokens,
+            **config, "samples": samples, "root": str(root),
+            "max_new_tokens": max_new_tokens, "validate": validate,
         })
         proc = subprocess.run(
             [sys.executable, "-m", "visionflow.accuracy", "--_worker", payload],
@@ -494,7 +496,7 @@ def main(argv: Optional[list[str]] = None):
         result = _run_worker(
             data["backend"], data["model_id"], data["label"], data["constrained"],
             data["samples"], data["root"], data["max_new_tokens"], data.get("quant_mode"),
-            data.get("speculative", False),
+            data.get("speculative", False), data.get("validate", True),
         )
         print(_MARKER + json.dumps(result.to_dict()), flush=True)
         return
@@ -508,6 +510,8 @@ def main(argv: Optional[list[str]] = None):
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--no-constrained", action="store_true",
                         help="Skip the grammar-constrained decoding comparison rows")
+    parser.add_argument("--no-validate", action="store_true",
+                        help="Disable pydantic schema validation (A/B against the default)")
     parser.add_argument("--speculative", action="store_true",
                         help="Also run a schema-structural speculative twin of each configuration")
     parser.add_argument("--only", nargs="*", default=None,
@@ -526,6 +530,7 @@ def main(argv: Optional[list[str]] = None):
         max_new_tokens=args.max_new_tokens, isolate=not args.no_isolate,
         include_constrained=not args.no_constrained,
         include_speculative=args.speculative,
+        validate=not args.no_validate,
         only=args.only, skip=args.skip, limit=args.limit,
     )
     table = to_markdown(report)

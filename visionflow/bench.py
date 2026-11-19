@@ -177,7 +177,7 @@ def available_configs(model_id: Optional[str] = None) -> list[BenchConfig]:
 
 
 def _run_worker(config: BenchConfig, images: list[str], prompt: str, repeats: int,
-                max_new_tokens: int) -> BenchResult:
+                max_new_tokens: int, attn: Optional[str] = None) -> BenchResult:
     """Measure one configuration in *this* process. Called inside the subprocess."""
     import torch
 
@@ -197,7 +197,7 @@ def _run_worker(config: BenchConfig, images: list[str], prompt: str, repeats: in
     tier = HardwareTier(config.backend)
     engine = ModelEngine(model_id=config.model_id, hardware=tier,
                          force_cpu=(tier == HardwareTier.CPU),
-                         quant_mode=config.quant_hint)
+                         quant_mode=config.quant_hint, attn_implementation=attn)
 
     try:
         load_stats = engine.load()
@@ -252,6 +252,7 @@ def run_benchmark(
     max_new_tokens: int = 256,
     model_id: Optional[str] = None,
     configs: Optional[list[BenchConfig]] = None,
+    attn: Optional[str] = None,
     isolate: bool = True,
     timeout: int = 3600,
 ) -> dict:
@@ -266,7 +267,7 @@ def run_benchmark(
     for config in configs:
         print(f"[bench] {config.label} ...", file=sys.stderr, flush=True)
         if not isolate:
-            results.append(_run_worker(config, images, prompt, repeats, max_new_tokens))
+            results.append(_run_worker(config, images, prompt, repeats, max_new_tokens, attn))
             continue
 
         payload = json.dumps({
@@ -274,7 +275,7 @@ def run_benchmark(
             "images": images,
             "prompt": prompt,
             "repeats": repeats,
-            "max_new_tokens": max_new_tokens,
+            "max_new_tokens": max_new_tokens, "attn": attn,
         })
         proc = subprocess.run(
             [sys.executable, "-m", "visionflow.bench", "--_worker", payload],
@@ -391,7 +392,8 @@ def _worker_main(payload: str):
     data = json.loads(payload)
     config = BenchConfig(**data["config"])
     result = _run_worker(
-        config, data["images"], data["prompt"], data["repeats"], data["max_new_tokens"]
+        config, data["images"], data["prompt"], data["repeats"], data["max_new_tokens"],
+        data.get("attn"),
     )
     print(_MARKER + json.dumps(asdict(result)), flush=True)
 
@@ -413,6 +415,9 @@ def main(argv: Optional[list[str]] = None):
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--model", default=None, help="Override the HF model id")
+    parser.add_argument("--attn", default=None,
+                        choices=["flash_attention_2", "sdpa", "eager"],
+                        help="Force an attention kernel instead of auto-selecting")
     parser.add_argument("--no-isolate", action="store_true",
                         help="Run all configs in one process (faster, but memory numbers are not independent)")
     parser.add_argument("--out", default="benchmarks/results/bench_report.json")
@@ -426,7 +431,7 @@ def main(argv: Optional[list[str]] = None):
     report = run_benchmark(
         images=images, prompt=args.prompt, repeats=args.repeats,
         max_new_tokens=args.max_new_tokens, model_id=args.model,
-        isolate=not args.no_isolate,
+        attn=args.attn, isolate=not args.no_isolate,
     )
 
     table = to_markdown(report)
