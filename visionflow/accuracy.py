@@ -60,6 +60,7 @@ class AccuracyResult:
     backend: str
     model_id: str
     constrained: bool
+    speculative: bool = False
     quantization: Optional[str] = None
     skipped: bool = False
     reason: Optional[str] = None
@@ -75,6 +76,7 @@ class AccuracyResult:
     total_new_tokens: int = 0
     total_repair_tokens: int = 0
     total_forward_passes: int = 0
+    total_tokens_saved: int = 0      # forward passes avoided by speculation
     outcomes: list[dict] = field(default_factory=list)
 
     @property
@@ -201,7 +203,8 @@ def load_labeled_set(path: Optional[str] = None, root: Optional[Path] = None) ->
 
 def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
                 samples: list[dict], root: str, max_new_tokens: int,
-                quant_mode: Optional[str] = None) -> AccuracyResult:
+                quant_mode: Optional[str] = None,
+                speculative: bool = False) -> AccuracyResult:
     """Evaluate one configuration in this process."""
     import time
 
@@ -210,7 +213,8 @@ def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
     from .engine import HardwareTier
     from .pipeline import VisionFlow
 
-    result = AccuracyResult(label=label, backend=backend, model_id=model_id, constrained=constrained)
+    result = AccuracyResult(label=label, backend=backend, model_id=model_id,
+                            constrained=constrained, speculative=speculative)
 
     if backend == "cuda" and not torch.cuda.is_available():
         result.skipped, result.reason = True, "no CUDA device on this machine"
@@ -240,6 +244,7 @@ def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
             extraction = vf.json(
                 image_path, prompt=sample["prompt"], schema=sample["schema"],
                 max_new_tokens=max_new_tokens, constrained=constrained,
+                speculative=speculative,
             )
         except Exception as e:
             result.n_samples += 1
@@ -254,6 +259,8 @@ def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
         result.total_new_tokens += extraction.new_tokens
         result.total_repair_tokens += extraction.repair_tokens
         result.total_forward_passes += extraction.forward_passes
+        if extraction.speculation:
+            result.total_tokens_saved += extraction.speculation.get("tokens_saved", 0)
 
         parsed = extraction.parsed if extraction.ok and isinstance(extraction.parsed, dict) else None
         # "Schema valid" means parseable AND carrying every requested key — a JSON
@@ -283,7 +290,8 @@ def _run_worker(backend: str, model_id: str, label: str, constrained: bool,
     return result
 
 
-def available_configs(model_id: Optional[str] = None, include_constrained: bool = True) -> list[dict]:
+def available_configs(model_id: Optional[str] = None, include_constrained: bool = True,
+                      include_speculative: bool = False) -> list[dict]:
     import torch
 
     from .engine import MODEL_TIERS, ModelSize, select_model
@@ -310,6 +318,15 @@ def available_configs(model_id: Optional[str] = None, include_constrained: bool 
         # no need to second-guess availability when building the list.
         for c in configs:
             out.append(dict(c, constrained=True, label=c["label"] + " + constrained"))
+
+    if include_speculative:
+        # Speculation splices forced text into the sequence, so its token
+        # boundaries can differ from what the model would emit for the same
+        # characters. That is documented as a caveat; this pairs each config with
+        # a speculative twin so the caveat is tested against measured accuracy
+        # rather than assumed negligible.
+        for c in list(out):
+            out.append(dict(c, speculative=True, label=c["label"] + " + speculative"))
     return out
 
 
@@ -337,6 +354,7 @@ def run_accuracy(
     max_new_tokens: int = 512,
     isolate: bool = True,
     include_constrained: bool = True,
+    include_speculative: bool = False,
     only: Optional[list[str]] = None,
     skip: Optional[list[str]] = None,
     limit: Optional[int] = None,
@@ -345,7 +363,8 @@ def run_accuracy(
     samples, root = load_labeled_set(labeled_set)
     if limit:
         samples = samples[:limit]
-    configs = available_configs(model_id, include_constrained=include_constrained)
+    configs = available_configs(model_id, include_constrained=include_constrained,
+                                include_speculative=include_speculative)
     configs = _filter_configs(configs, only, skip)
     results = []
 
@@ -355,7 +374,7 @@ def run_accuracy(
             results.append(_run_worker(
                 config["backend"], config["model_id"], config["label"],
                 config["constrained"], samples, str(root), max_new_tokens,
-                config.get("quant_mode"),
+                config.get("quant_mode"), config.get("speculative", False),
             ).to_dict())
             continue
 
@@ -378,7 +397,8 @@ def run_accuracy(
             tail = (proc.stderr or "").strip().splitlines()[-3:]
             parsed = AccuracyResult(
                 label=config["label"], backend=config["backend"], model_id=config["model_id"],
-                constrained=config["constrained"], skipped=True,
+                constrained=config["constrained"],
+                speculative=config.get("speculative", False), skipped=True,
                 reason=f"worker exited {proc.returncode}: {' / '.join(tail) or 'no output'}",
             ).to_dict()
         results.append(parsed)
@@ -474,6 +494,7 @@ def main(argv: Optional[list[str]] = None):
         result = _run_worker(
             data["backend"], data["model_id"], data["label"], data["constrained"],
             data["samples"], data["root"], data["max_new_tokens"], data.get("quant_mode"),
+            data.get("speculative", False),
         )
         print(_MARKER + json.dumps(result.to_dict()), flush=True)
         return
@@ -487,6 +508,8 @@ def main(argv: Optional[list[str]] = None):
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--no-constrained", action="store_true",
                         help="Skip the grammar-constrained decoding comparison rows")
+    parser.add_argument("--speculative", action="store_true",
+                        help="Also run a schema-structural speculative twin of each configuration")
     parser.add_argument("--only", nargs="*", default=None,
                         help="Only run configurations whose label contains one of these (e.g. --only cuda)")
     parser.add_argument("--skip", nargs="*", default=None,
@@ -502,6 +525,7 @@ def main(argv: Optional[list[str]] = None):
         labeled_set=args.labeled_set, model_id=args.model,
         max_new_tokens=args.max_new_tokens, isolate=not args.no_isolate,
         include_constrained=not args.no_constrained,
+        include_speculative=args.speculative,
         only=args.only, skip=args.skip, limit=args.limit,
     )
     table = to_markdown(report)
