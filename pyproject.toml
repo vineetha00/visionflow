@@ -46,7 +46,20 @@ dependencies = [
 cuda = ["bitsandbytes>=0.43"]
 # FlashAttention-2. CUDA-only: the package builds against CUDA and has no Metal
 # equivalent, so on Apple Silicon the engine selects PyTorch SDPA instead and
-# records which kernel actually loaded. Needs a CUDA toolchain to build.
+# records which kernel actually loaded.
+#
+# `pip install visionflow-edge[flash]` will FAIL. flash-attn's setup.py imports
+# torch at build time, and pip builds in an isolated environment where torch is
+# absent -- "ModuleNotFoundError: No module named 'torch'". It has to be
+# installed separately, against the existing torch:
+#
+#   pip install packaging ninja
+#   MAX_JOBS=4 pip install flash-attn --no-build-isolation
+#
+# MAX_JOBS bounds a large CUDA compile that otherwise spawns one job per core;
+# on a shared login node that matters. nvcc must be on PATH (load the cuda
+# module first). Left declared here as documentation of the intended dependency
+# -- the engine treats its absence as a normal case and falls back to SDPA.
 flash = ["flash-attn>=2.5"]
 cpu = ["llama-cpp-python>=0.2.90"]
 eval = ["openai>=1.30", "matplotlib>=3.8", "psutil>=5.9"]

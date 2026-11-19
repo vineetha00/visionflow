@@ -354,9 +354,17 @@ The engine selects an attention implementation per device and **records which on
 
 | Device | Selected | Note |
 |---|---|---|
-| NVIDIA + `flash-attn` installed | `flash_attention_2` | `pip install "visionflow-edge[flash]"`; needs a CUDA toolchain to build |
+| NVIDIA + `flash-attn` installed | `flash_attention_2` | Install it separately — see below |
 | NVIDIA without it | `sdpa` | PyTorch's fused kernels |
 | Apple Silicon / CPU | `sdpa` | FlashAttention is CUDA-only — the package has no Metal build |
+
+`pip install "visionflow-edge[flash]"` does **not** work: flash-attn's `setup.py` imports torch at build time while pip builds in an isolated environment without it, so it fails with `ModuleNotFoundError: No module named 'torch'`. Install it against the existing torch instead, with `nvcc` on PATH:
+
+```bash
+pip install packaging ninja && MAX_JOBS=4 pip install flash-attn --no-build-isolation
+```
+
+`MAX_JOBS` bounds a large CUDA compile that otherwise spawns a job per core — it matters on a shared login node, and the build still takes 10–30 minutes. Skipping it is fine: the engine falls back to SDPA and records that, so nothing is misreported.
 
 Override with `VisionFlow(attn_implementation="eager")`. If a requested kernel fails to load the engine falls back and records it as `sdpa (requested flash_attention_2)` rather than reporting the fallback under the original name — the same rule the ONNX harness applies to execution providers, for the same reason: a silent downgrade leaves a latency number meaning something other than its label. The `Attn` column in `vf bench` shows what each row ran with.
 
