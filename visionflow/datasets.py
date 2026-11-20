@@ -110,11 +110,20 @@ def build(
     n: int = 200,
     out_dir: Optional[str] = None,
     seed: int = 0,
+    split: Optional[str] = None,
 ) -> Path:
-    """Materialize `n` samples from `source` into a labeled set. Returns its path."""
+    """Materialize `n` samples from `source` into a labeled set. Returns its path.
+
+    `split` overrides the source's default. DocVQA's test split has only 200
+    examples, so a larger n has to draw from train -- which is fine for an
+    evaluation set when nothing was ever trained on it, and the manifest records
+    the split so a reader can see which one a number came from.
+    """
     if source not in SOURCES:
         raise ValueError(f"unknown source {source!r}; choose from {sorted(SOURCES)}")
-    spec = SOURCES[source]
+    spec = dict(SOURCES[source])
+    if split:
+        spec["split"] = split
 
     try:
         from datasets import load_dataset
@@ -201,9 +210,11 @@ def main(argv: Optional[list[str]] = None):
     parser.add_argument("-n", type=int, default=200, help="number of samples (default 200)")
     parser.add_argument("--out-dir", default=None)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--split", default=None,
+                        help="Dataset split (default: the source's test split; DocVQA test has only 200)")
     args = parser.parse_args(argv)
 
-    path = build(args.source, n=args.n, out_dir=args.out_dir, seed=args.seed)
+    path = build(args.source, n=args.n, out_dir=args.out_dir, seed=args.seed, split=args.split)
     print(path)
     print(f"\nRun the accuracy harness against it with:\n  vf accuracy --labeled-set {path}")
 

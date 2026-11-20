@@ -175,44 +175,79 @@ def _save_results(tag: str) -> list[str]:
     return copied
 
 
-def _ensure_dataset(source: str, n: int) -> None:
+def _ensure_dataset(source: str, n: int, split: str = "") -> None:
     """Build the labeled set if its manifest OR images are missing."""
     probe = (
         "import sys; from visionflow.datasets import is_built; "
         f"sys.exit(0 if is_built('benchmarks/datasets/{source}_{n}/labeled_set.json') else 1)"
     )
     if subprocess.run(["python", "-c", probe], cwd=REPO_DIR).returncode != 0:
-        _run(["vf", "dataset", source, "-n", str(n), "--seed", "0"])
+        cmd = ["vf", "dataset", source, "-n", str(n), "--seed", "0"]
+        if split:
+            cmd += ["--split", split]
+        _run(cmd)
 
 
-COMMON = dict(
-    gpu=GPU,
-    volumes={HF_CACHE: hf_cache, RESULTS: results_vol},
-    cpu=8,
-    memory=32768,
-)
+# The two rows per quantization that carry information. The unconstrained row
+# is 0/N on every model measured so far, and `constrained + speculative` is
+# byte-identical to `speculative` (the speculative path never consults the
+# logits processor). Running all eight at n=500 would spend ~75% of the compute
+# re-measuring things already known.
+def _paired_labels(backend: str) -> list[str]:
+    if backend == "cuda":
+        return [
+            "CUDA / INT4 (bnb nf4) + constrained", "CUDA / INT8 (bnb) + constrained",
+            "CUDA / INT4 (bnb nf4) + speculative", "CUDA / INT8 (bnb) + speculative",
+        ]
+    return ["CPU / fp32 + constrained", "CPU / fp32 + speculative"]
 
 
-@app.function(image=base_image, timeout=4 * 60 * MINUTES, **COMMON)
-def accuracy(source: str = "docvqa", n: int = 150, speculative: bool = True,
-             max_new_tokens: int = 128, only: str = "cuda") -> list[str]:
-    rev = _pull_latest()
-    print(f"repo @ {rev}")
-    _preflight()
-    _ensure_dataset(source, n)
+def _accuracy_cmd(source: str, n: int, max_new_tokens: int, tag: str,
+                  only: list[str], speculative: bool) -> list[str]:
     cmd = [
         "vf", "accuracy",
         "--labeled-set", f"benchmarks/datasets/{source}_{n}/labeled_set.json",
         "--max-new-tokens", str(max_new_tokens),
-        "--out", f"benchmarks/results/accuracy_{source}{n}_cuda.json",
-        "--markdown", f"benchmarks/results/accuracy_{source}{n}_cuda.md",
+        "--out", f"benchmarks/results/accuracy_{source}{n}_{tag}.json",
+        "--markdown", f"benchmarks/results/accuracy_{source}{n}_{tag}.md",
     ]
     if only:
-        cmd += ["--only", only]
+        cmd += ["--only", *only]
     if speculative:
         cmd.append("--speculative")
-    _run(cmd)
-    return _save_results(f"accuracy-{source}{n}")
+    return cmd
+
+
+VOLUMES = {HF_CACHE: hf_cache, RESULTS: results_vol}
+COMMON = dict(gpu=GPU, volumes=VOLUMES, cpu=8, memory=32768)
+
+
+@app.function(image=base_image, timeout=4 * 60 * MINUTES, **COMMON)
+def accuracy(source: str = "docvqa", n: int = 150, speculative: bool = True,
+             max_new_tokens: int = 128, only: str = "cuda", paired: bool = False,
+             split: str = "") -> list[str]:
+    rev = _pull_latest()
+    print(f"repo @ {rev}")
+    _preflight()
+    _ensure_dataset(source, n, split)
+    labels = _paired_labels("cuda") if paired else ([only] if only else [])
+    _run(_accuracy_cmd(source, n, max_new_tokens, "cuda", labels, speculative))
+    return _save_results(f"accuracy-{source}{n}-cuda")
+
+
+# fp32 reference on CPU only: no GPU is billed, and the model is the same
+# weights at full precision. The comparison that decides "what does quantization
+# cost" is this row against the INT4/INT8 rows at the same n.
+@app.function(image=base_image, timeout=12 * 60 * MINUTES, volumes=VOLUMES,
+              cpu=16, memory=65536)
+def accuracy_cpu(source: str = "docvqa", n: int = 150, max_new_tokens: int = 128,
+                 split: str = "") -> list[str]:
+    rev = _pull_latest()
+    print(f"repo @ {rev}")
+    _preflight()
+    _ensure_dataset(source, n, split)
+    _run(_accuracy_cmd(source, n, max_new_tokens, "cpu_fp32", _paired_labels("cpu"), True))
+    return _save_results(f"accuracy-{source}{n}-cpu_fp32")
 
 
 @app.function(image=base_image, timeout=90 * MINUTES, **COMMON)
@@ -264,10 +299,20 @@ def onnx(runs: int = 50) -> list[str]:
 
 @app.local_entrypoint()
 def main(task: str = "accuracy", source: str = "docvqa", n: int = 150,
-         attn: str = "", no_speculative: bool = False):
-    """Dispatch. `--task all` runs accuracy on both datasets, bench, bench_flash, onnx."""
+         attn: str = "", no_speculative: bool = False, paired: bool = False,
+         split: str = ""):
+    """Dispatch. `--task all` runs accuracy on both datasets, bench, bench_flash, onnx.
+
+    --paired   only the constrained + speculative rows per quantization (see _paired_labels)
+    --split    dataset split; DocVQA test has 200 examples, so n>200 needs --split train
+    """
+    if source == "docvqa" and n > 200 and not split:
+        split = "train"
+        print("docvqa test split has 200 examples; using --split train for n>200")
     tasks = {
-        "accuracy": lambda: accuracy.remote(source=source, n=n, speculative=not no_speculative),
+        "accuracy": lambda: accuracy.remote(source=source, n=n, speculative=not no_speculative,
+                                            paired=paired, split=split),
+        "accuracy_cpu": lambda: accuracy_cpu.remote(source=source, n=n, split=split),
         "bench": lambda: bench.remote(attn=attn),
         "onnx": lambda: onnx.remote(),
     }
