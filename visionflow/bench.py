@@ -270,7 +270,9 @@ def run_benchmark(
             results.append(_run_worker(config, images, prompt, repeats, max_new_tokens, attn))
             continue
 
-        payload = json.dumps({
+        from ._worker import write_payload
+
+        payload_path = write_payload({
             "config": asdict(config),
             "images": images,
             "prompt": prompt,
@@ -278,7 +280,7 @@ def run_benchmark(
             "max_new_tokens": max_new_tokens, "attn": attn,
         })
         proc = subprocess.run(
-            [sys.executable, "-m", "visionflow.bench", "--_worker", payload],
+            [sys.executable, "-m", "visionflow.bench", "--_worker", payload_path],
             capture_output=True, text=True, timeout=timeout,
         )
         parsed = _parse_worker_output(proc.stdout)
@@ -389,7 +391,9 @@ def to_markdown(report: dict) -> str:
 
 
 def _worker_main(payload: str):
-    data = json.loads(payload)
+    from ._worker import read_payload
+
+    data = read_payload(payload)
     config = BenchConfig(**data["config"])
     result = _run_worker(
         config, data["images"], data["prompt"], data["repeats"], data["max_new_tokens"],

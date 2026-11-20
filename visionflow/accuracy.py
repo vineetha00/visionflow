@@ -379,12 +379,16 @@ def run_accuracy(
             ).to_dict())
             continue
 
-        payload = json.dumps({
+        from ._worker import write_payload
+
+        # Through a file, not argv: the sample list exceeds the per-argument
+        # limit somewhere between n=150 and n=500. See _worker.py.
+        payload_path = write_payload({
             **config, "samples": samples, "root": str(root),
             "max_new_tokens": max_new_tokens, "validate": validate,
         })
         proc = subprocess.run(
-            [sys.executable, "-m", "visionflow.accuracy", "--_worker", payload],
+            [sys.executable, "-m", "visionflow.accuracy", "--_worker", payload_path],
             capture_output=True, text=True, timeout=timeout,
         )
         parsed = None
@@ -492,7 +496,9 @@ def main(argv: Optional[list[str]] = None):
 
     argv = list(sys.argv[1:] if argv is None else argv)
     if argv and argv[0] == "--_worker":
-        data = json.loads(argv[1])
+        from ._worker import read_payload
+
+        data = read_payload(argv[1])
         result = _run_worker(
             data["backend"], data["model_id"], data["label"], data["constrained"],
             data["samples"], data["root"], data["max_new_tokens"], data.get("quant_mode"),

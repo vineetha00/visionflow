@@ -149,8 +149,20 @@ def _preflight() -> None:
 
 
 def _run(cmd: list[str]) -> int:
+    """Run a harness command; raise if it fails.
+
+    Raising matters more than it looks. `_save_results` copies whatever is in
+    benchmarks/results/, so a harness that died before writing would still
+    produce a timestamped results directory -- full of the *previous* run's
+    files, indistinguishable at a glance from a success. That happened: an
+    n=500 sweep died on an argv limit and left a directory that a watcher
+    accepted as the result. A failed command now fails the Modal call instead.
+    """
     print("$", " ".join(cmd), flush=True)
-    return subprocess.run(cmd, cwd=REPO_DIR).returncode
+    rc = subprocess.run(cmd, cwd=REPO_DIR).returncode
+    if rc != 0:
+        raise RuntimeError(f"command exited {rc}: {' '.join(cmd[:3])} ...")
+    return rc
 
 
 def _save_results(tag: str) -> list[str]:
