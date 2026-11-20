@@ -19,3 +19,4 @@ benchmarks/onnx/
 # `vf dataset <source> -n <n> --seed <seed>`. The labeled_set.json manifests
 # next to them ARE committed, so a run is reproducible without the blobs.
 benchmarks/datasets/*/images/
+modal_results/

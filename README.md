@@ -397,6 +397,33 @@ Against the baseline, speculation looks like a **3.3×** speedup. That number is
 
 **The tokenization caveat now has evidence against it.** Forced text is tokenized on its own and spliced in, so token boundaries can differ from what the model would produce in context, and the KV cache holds a slightly unusual segmentation that could in principle nudge subsequent *value* tokens. The n=30 comparison above is the test: speculative value accuracy was not worse than constrained (10/30 vs 9/30 exact). One model, one dataset, n=30 — not a proof, but the concern no longer stands unexamined. Raw outcomes: [`benchmarks/results/v030_ablations/`](benchmarks/results/v030_ablations/).
 
+### Measured at n=150 on the 2.25B model — NVIDIA L40S
+
+The run above was the 256M model on an M3. This is the model the project ships, on the GPU the other README numbers come from: 150 DocVQA documents, SmolVLM-2.25B, `max_new_tokens=128`, run on Modal via [`scripts/modal_run.py`](scripts/modal_run.py).
+
+| Configuration | s/sample | Schema-valid [95% CI] | Exact [95% CI] | Fuzzy | Repairs | Tokens (1st + repair) |
+|---|---|---|---|---|---|---|
+| INT4, unconstrained | 2.4 | 0% (0/150) [0–2] | 0% [0–2] | 0% | 150 | 104 (7 + 97) |
+| INT8, unconstrained | 7.3 | 0% (0/150) [0–2] | 0% [0–2] | 0% | 150 | 104 (7 + 97) |
+| INT4 + constrained | 0.9 | 93% (140/150) [88–96] | 58% [50–66] | 69% | 10 | 32 (24 + 7) |
+| INT8 + constrained | 2.5 | 93% (139/150) [87–96] | 65% [57–72] | 75% | 11 | 30 (21 + 9) |
+| **INT4 + speculative** | **0.5** | **100%** (150/150) [98–100] | 59% [51–67] | 69% | 3 | 14 (13 + 1) |
+| **INT8 + speculative** | **1.1** | **100%** (150/150) [98–100] | **67%** [59–74] | **76%** | **0** | 13 (13 + 0) |
+
+Five things this settles, in order of how much they change the README's claims:
+
+**1. Speculation's margin over constrained decoding is larger on the real model: 1.8× (INT4) and 2.3× (INT8).** With 100% validity against 93%, repairs cut from 10→3 and 11→0, and accuracy equal or slightly better in both pairs. This is the tokenization caveat tested at n=150 on the production model, and it did not bite. The margin being *bigger* than the 256M run's 1.32× is consistent with the confound named above: the per-step Python grammar check in constrained decoding is a larger share of wall-clock on a fast GPU, so removing it buys more there.
+
+**2. The unconstrained baseline is 0 for 150 — on the 2.25B model, at both quantizations.** Seven tokens of prose, then 97 tokens of repair that also fails, on every sample. The headline for constrained decoding is no longer "2% → 79% on a 256M model". It is **0% → 93% on the shipped model, and 0% → 100% with speculation.** The repair loop, re-prompting a model that has produced prose, recovered nothing in 300 attempts.
+
+**3. INT4 vs INT8 accuracy *still* does not separate at n=150.** 58% [50–66] vs 65% [57–72] under constrained decoding; 59% vs 67% under speculation. The harness's own "not statistically distinguishable" line fired. INT8 leads by 7–8 points in every pairing, which is suggestive and is not evidence — settling it needs n in the several hundreds. What *is* settled is speed: **INT4 is 2.2–3× faster than INT8 in every configuration** (3.0× unconstrained, 2.8× constrained, 2.2× speculative), consistent with the 3.7× in the latency table.
+
+**4. `constrained=True, speculative=True` is byte-identical to `speculative=True`.** The speculative path runs its own decode loop and never consults the grammar logits processor, so the flags do not stack. Documented here so nobody reads the identical rows as two independent measurements.
+
+**5. Still open: quantized vs full precision.** No fp32 row here by design — on CPU it is a ~4-hour run at this n. That comparison remains directional only.
+
+Raw outcomes: [`benchmarks/results/accuracy_docvqa150_cuda.json`](benchmarks/results/accuracy_docvqa150_cuda.json).
+
 When the output leaves the skeleton anyway, speculation stops and records `diverged: true` rather than forcing a shape the model has already contradicted.
 
 ## Attention kernels
@@ -436,7 +463,7 @@ Three features shipped in v0.3.0. Each was then measured against its own absence
 
 | Feature | Fair comparison | Result | Verdict |
 |---|---|---|---|
-| **Speculative decoding** | vs constrained decoding (both guarantee JSON) | **1.32× faster**, 30/30 vs 26/30 schema-valid, accuracy equal or better | Improved — with a stated confound (no per-step Python processor on the speculative path) |
+| **Speculative decoding** | vs constrained decoding (both guarantee JSON) | **1.8–2.3× faster** on the 2.25B model at n=150 (1.32× on 256M at n=30); 100% vs 93% schema-valid; accuracy equal or better | Improved — with a stated confound (no per-step Python processor on the speculative path) |
 | **Attention kernel selection** | SDPA vs eager | **1.37× on MPS, 1.77× on CPU** | Improved |
 | **Pydantic validation** | on vs off, on top of constrained decoding | Identical accuracy and validity, **1.22× slower** | **Did not improve any number.** Keeps a correctness guarantee; its repair-prompt advantage is untested on a model that could use it |
 
@@ -560,7 +587,7 @@ Only the vision encoder is exported by default: it's a single fixed-shape forwar
 ## What makes this different from just running SmolVLM
 
 1. **A benchmarking methodology, not a benchmark run** — process isolation, excluded warmup, p50/p95, tokens/sec, and explicit skip rows. The methodology section above documents *why* each choice was made, including the memory-measurement bug it was written to fix.
-2. **Correctness moved from prompting into the inference stack** — grammar-constrained decoding makes invalid JSON unrepresentable, with the repair loop demoted to a fallback for schema semantics. On 150 real DocVQA documents this is the difference between 2% and 79% usable output, and it is *faster*.
+2. **Correctness moved from prompting into the inference stack** — grammar-constrained decoding makes invalid JSON unrepresentable, with the repair loop demoted to a fallback for schema semantics. On 150 real DocVQA documents with the 2.25B model, this is the difference between **0% and 93%** usable output — 100% with schema-structural speculation — and it is *faster*: the unconstrained model spent 97 tokens per sample on repairs that recovered nothing.
 3. **Capability tiers per device** — model size is part of hardware auto-detection, so the same code path serves an M3 and a Pi without the user choosing a checkpoint.
 4. **Accuracy reported against quantization level, not in isolation** — schema validity and field accuracy per configuration, so the speed/accuracy trade-off is visible instead of asserted. This is what surfaced the fp16 accuracy cliff above, which a latency-only benchmark would have reported as a straight 3.7× win.
 5. **Honest about what wasn't run** — the GGUF path is implemented and explicitly unmeasured, and says so in its table rather than being quietly omitted. The TensorRT row carried a "this is NOT a TensorRT measurement" flag through two failed attempts before it was earned, rather than publishing the CPU latency ORT had silently substituted.
@@ -596,7 +623,8 @@ visionflow/
 Listed here rather than discovered later:
 
 - **The fp16-on-MPS accuracy drop is measured but not explained**, and the L40S run makes it stranger rather than clearer: 4-bit NF4 on CUDA beats 16-bit float on MPS by 7× on exact accuracy. That rules out "fp16 is simply lossy" as a sufficient explanation and points at MPS backend numerics, but two variables move at once and it is not proven. Needs a per-layer activation comparison between the MPS and CUDA vision towers. Not fixed here.
-- **The headline tables above are still computed on the 21-field hand-built set, and most of their comparisons don't clear their confidence intervals.** Only fp32-vs-fp16-on-MPS does. `vf dataset` now builds DocVQA/ChartQA sets at arbitrary n and the harness reports Wilson intervals, so the tooling gap is closed — but the large-n sweep that would upgrade those directional claims into measurements has only been run on the 256M model so far. The 2.25B INT4/INT8/fp32 comparison at n≥150 is the outstanding work, and [`scripts/carc_accuracy_large.slurm`](scripts/carc_accuracy_large.slurm) runs it.
+- **INT4 vs INT8 accuracy is unresolved even at n=150.** The L40S sweep on the 2.25B model gave 58% [50–66] vs 65% [57–72] — overlapping, with INT8 ahead by 7–8 points in every pairing. That is suggestive, not established; settling it needs n in the several hundreds, and `vf dataset docvqa -n 500` plus [`scripts/modal_run.py`](scripts/modal_run.py) is about $8 of L40S time. INT4's 2.2–3× *speed* advantage is not in question.
+- **Quantized vs full precision at large n is still directional.** The n=150 sweep ran CUDA rows only; the fp32 reference is a ~4-hour CPU run at that n and has not been done. The 21-field result (fp32 76% vs INT4 38%) remains the only measurement, and its intervals overlap.
 - **The ONNX/TensorRT numbers cover the vision encoder only, not end-to-end generation.** The autoregressive decoder — where most inference time actually goes — is still PyTorch. Exporting it needs separate prefill/decode graphs with KV-cache tensors as graph I/O, and is the obvious next piece of work. A 109.8× speedup on the encoder is not a 109.8× speedup on the pipeline.
 - **The 500M tier and the 256M-on-CUDA combination remain unbenchmarked.**
 - **The labeled set is 3 images.** Enough to compare configurations, not enough to state an absolute accuracy figure.
