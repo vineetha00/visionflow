@@ -6,6 +6,11 @@
     modal run scripts/modal_run.py --task bench --attn eager   # kernel A/B: run once per kernel
     modal run scripts/modal_run.py --task onnx                 # export + TensorRT/CUDA/CPU providers
     modal run scripts/modal_run.py --task all
+    VISIONFLOW_FLASH=1 modal run scripts/modal_run.py --task bench_flash   # opt-in, slow build
+
+Add --detach to any of these to let it run after you close the laptop -- but only
+once the image is built and the function has started. The build phase is still
+tied to your client; closing the lid during it kills the build.
 
 One-time setup, done by you (these touch your account and I can't do them):
 
@@ -42,6 +47,7 @@ Design decisions, each one a failure that happened on CARC:
 
 from __future__ import annotations
 
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -88,10 +94,26 @@ base_image = (
     })
 )
 
-# FlashAttention-2 as its own layer: a slow, fragile build that should only cost
-# the row that needs it if it fails.
-flash_image = base_image.pip_install(
-    "flash-attn>=2.5", extra_options="--no-build-isolation",
+# FlashAttention-2 is OPT-IN:  VISIONFLOW_FLASH=1 modal run ... --task bench_flash
+#
+# It was originally a separate image layer on the theory that a failed build
+# would only cost the one row that needs it. That theory was wrong: `modal run`
+# builds every image any function in the app references, whichever task you
+# asked for, so a flash-attn build failure blocked `--task accuracy` -- which
+# never touches flash-attn. Gating the image and its function behind an env var
+# means they do not exist unless requested, and the other tasks cannot be held
+# hostage by a 20-minute CUDA compile.
+#
+# MAX_JOBS=4 and a GPU on the build step address the two usual reasons the wheel
+# build dies: parallel nvcc exhausting the builder's memory, and the build not
+# being able to detect a target architecture.
+FLASH = os.environ.get("VISIONFLOW_FLASH") == "1"
+flash_image = (
+    base_image.pip_install(
+        "flash-attn>=2.5", extra_options="--no-build-isolation",
+        env={"MAX_JOBS": "4"}, gpu=GPU,
+    )
+    if FLASH else None
 )
 
 
@@ -210,19 +232,20 @@ def bench(attn: str = "", repeats: int = 3, max_new_tokens: int = 256) -> list[s
     return _save_results(f"bench{suffix}")
 
 
-@app.function(image=flash_image, timeout=90 * MINUTES, **COMMON)
-def bench_flash(repeats: int = 3, max_new_tokens: int = 256) -> list[str]:
-    """Same as bench, on the image with flash-attn built. Auto-select picks it up."""
-    rev = _pull_latest()
-    print(f"repo @ {rev}")
-    _preflight()
-    _run([
-        "vf", "bench", "--repeats", str(repeats), "--max-new-tokens", str(max_new_tokens),
-        "--attn", "flash_attention_2",
-        "--out", "benchmarks/results/bench_report_cuda_flash.json",
-        "--markdown", "benchmarks/results/bench_table_cuda_flash.md",
-    ])
-    return _save_results("bench_flash")
+if FLASH:
+    @app.function(image=flash_image, timeout=90 * MINUTES, **COMMON)
+    def bench_flash(repeats: int = 3, max_new_tokens: int = 256) -> list[str]:
+        """Same as bench, on the image with flash-attn built."""
+        rev = _pull_latest()
+        print(f"repo @ {rev}")
+        _preflight()
+        _run([
+            "vf", "bench", "--repeats", str(repeats), "--max-new-tokens", str(max_new_tokens),
+            "--attn", "flash_attention_2",
+            "--out", "benchmarks/results/bench_report_cuda_flash.json",
+            "--markdown", "benchmarks/results/bench_table_cuda_flash.md",
+        ])
+        return _save_results("bench_flash")
 
 
 @app.function(image=base_image, timeout=60 * MINUTES, **COMMON)
@@ -246,18 +269,24 @@ def main(task: str = "accuracy", source: str = "docvqa", n: int = 150,
     tasks = {
         "accuracy": lambda: accuracy.remote(source=source, n=n, speculative=not no_speculative),
         "bench": lambda: bench.remote(attn=attn),
-        "bench_flash": lambda: bench_flash.remote(),
         "onnx": lambda: onnx.remote(),
     }
+    if FLASH:
+        tasks["bench_flash"] = lambda: bench_flash.remote()
+    elif task == "bench_flash":
+        raise SystemExit(
+            "bench_flash needs the flash-attn image, which is opt-in:\n"
+            "  VISIONFLOW_FLASH=1 modal run --detach scripts/modal_run.py --task bench_flash"
+        )
     if task == "all":
         accuracy.remote(source="docvqa", n=n, speculative=not no_speculative)
         accuracy.remote(source="chartqa", n=n, speculative=not no_speculative)
         bench.remote()
         onnx.remote()
-        try:
+        if FLASH:
             bench_flash.remote()
-        except Exception as e:  # a failed flash-attn build should not sink the rest
-            print(f"bench_flash failed: {e}")
+        else:
+            print("skipped bench_flash (set VISIONFLOW_FLASH=1 to include it)")
         return
     if task not in tasks:
         raise SystemExit(f"unknown --task {task!r}; choose from {sorted(tasks)} or 'all'")
