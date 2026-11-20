@@ -202,8 +202,15 @@ def _paired_labels(backend: str) -> list[str]:
     return ["CPU / fp32 + constrained", "CPU / fp32 + speculative"]
 
 
+# `--only` is a substring match, and "X + constrained" is a prefix of
+# "X + constrained + speculative", so the paired labels alone let the duplicate
+# row back in. The skip closes that hole.
+PAIRED_SKIP = ["constrained + speculative"]
+
+
 def _accuracy_cmd(source: str, n: int, max_new_tokens: int, tag: str,
-                  only: list[str], speculative: bool) -> list[str]:
+                  only: list[str], speculative: bool,
+                  skip: list[str] | None = None) -> list[str]:
     cmd = [
         "vf", "accuracy",
         "--labeled-set", f"benchmarks/datasets/{source}_{n}/labeled_set.json",
@@ -213,6 +220,8 @@ def _accuracy_cmd(source: str, n: int, max_new_tokens: int, tag: str,
     ]
     if only:
         cmd += ["--only", *only]
+    if skip:
+        cmd += ["--skip", *skip]
     if speculative:
         cmd.append("--speculative")
     return cmd
@@ -231,7 +240,8 @@ def accuracy(source: str = "docvqa", n: int = 150, speculative: bool = True,
     _preflight()
     _ensure_dataset(source, n, split)
     labels = _paired_labels("cuda") if paired else ([only] if only else [])
-    _run(_accuracy_cmd(source, n, max_new_tokens, "cuda", labels, speculative))
+    _run(_accuracy_cmd(source, n, max_new_tokens, "cuda", labels, speculative,
+                       skip=PAIRED_SKIP if paired else None))
     return _save_results(f"accuracy-{source}{n}-cuda")
 
 
@@ -246,7 +256,8 @@ def accuracy_cpu(source: str = "docvqa", n: int = 150, max_new_tokens: int = 128
     print(f"repo @ {rev}")
     _preflight()
     _ensure_dataset(source, n, split)
-    _run(_accuracy_cmd(source, n, max_new_tokens, "cpu_fp32", _paired_labels("cpu"), True))
+    _run(_accuracy_cmd(source, n, max_new_tokens, "cpu_fp32", _paired_labels("cpu"), True,
+                       skip=PAIRED_SKIP))
     return _save_results(f"accuracy-{source}{n}-cpu_fp32")
 
 
@@ -309,31 +320,40 @@ def main(task: str = "accuracy", source: str = "docvqa", n: int = 150,
     if source == "docvqa" and n > 200 and not split:
         split = "train"
         print("docvqa test split has 200 examples; using --split train for n>200")
+    # .spawn(), not .remote(): .remote() blocks the local client for the whole run
+    # even under --detach, so a 4-hour fp32 sweep would pin the terminal for 4
+    # hours. spawn returns a handle immediately; with --detach the app and its
+    # spawned calls keep running after this process exits.
     tasks = {
-        "accuracy": lambda: accuracy.remote(source=source, n=n, speculative=not no_speculative,
-                                            paired=paired, split=split),
-        "accuracy_cpu": lambda: accuracy_cpu.remote(source=source, n=n, split=split),
-        "bench": lambda: bench.remote(attn=attn),
-        "onnx": lambda: onnx.remote(),
+        "accuracy": lambda: accuracy.spawn(source=source, n=n, speculative=not no_speculative,
+                                           paired=paired, split=split),
+        "accuracy_cpu": lambda: accuracy_cpu.spawn(source=source, n=n, split=split),
+        "bench": lambda: bench.spawn(attn=attn),
+        "onnx": lambda: onnx.spawn(),
     }
     if FLASH:
-        tasks["bench_flash"] = lambda: bench_flash.remote()
+        tasks["bench_flash"] = lambda: bench_flash.spawn()
     elif task == "bench_flash":
         raise SystemExit(
             "bench_flash needs the flash-attn image, which is opt-in:\n"
             "  VISIONFLOW_FLASH=1 modal run --detach scripts/modal_run.py --task bench_flash"
         )
     if task == "all":
-        accuracy.remote(source="docvqa", n=n, speculative=not no_speculative)
-        accuracy.remote(source="chartqa", n=n, speculative=not no_speculative)
-        bench.remote()
-        onnx.remote()
+        calls = [
+            accuracy.spawn(source="docvqa", n=n, speculative=not no_speculative),
+            accuracy.spawn(source="chartqa", n=n, speculative=not no_speculative),
+            bench.spawn(), onnx.spawn(),
+        ]
         if FLASH:
-            bench_flash.remote()
+            calls.append(bench_flash.spawn())
         else:
             print("skipped bench_flash (set VISIONFLOW_FLASH=1 to include it)")
+        for c in calls:
+            print("spawned", c.object_id)
         return
     if task not in tasks:
         raise SystemExit(f"unknown --task {task!r}; choose from {sorted(tasks)} or 'all'")
-    tasks[task]()
-    print("\nDownload everything with:\n  modal volume get visionflow-results / ./modal_results")
+    call = tasks[task]()
+    print(f"spawned {task}: {call.object_id}")
+    print("Runs on Modal's side now. Watch:  modal app logs visionflow")
+    print("Results:  modal volume get --force visionflow-results / ./modal_results")
