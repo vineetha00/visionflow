@@ -109,7 +109,12 @@ base_image = (
 # being able to detect a target architecture.
 FLASH = os.environ.get("VISIONFLOW_FLASH") == "1"
 flash_image = (
-    base_image.pip_install(
+    base_image
+    # The nvidia/cuda devel image ships nvcc but no host C++ compiler; without
+    # one the flash-attn build fails with "clang++ (0.0.0) is less than the
+    # minimum required version by CUDA 12.6 (7.0)". Seen in a real run.
+    .apt_install("build-essential")
+    .pip_install(
         "flash-attn>=2.5", extra_options="--no-build-isolation",
         env={"MAX_JOBS": "4"}, gpu=GPU,
     )
